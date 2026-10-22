@@ -1,0 +1,14 @@
+---
+import { url } from '../lib/url';
+interface Props {
+  variant?: 'light' | 'dark';
+  width?: number;
+  class?: string;
+}
+const { variant = 'light', width = 150, class: cls } = Astro.props;
+const src = url(`/images/brand/engage-logo-${variant}`);
+---
+<picture class={cls}>
+  <source srcset={`${src}.webp`} type="image/webp" />
+  <img src={`${src}.png`} width={width} height={Math.round((width * 267) / 480)} alt="ENGAGE — Future Engineers" decoding="async" />
+</picture>

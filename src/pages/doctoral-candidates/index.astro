@@ -1,0 +1,270 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import DcCard from '../../components/DcCard.astro';
+import Icon from '../../components/Icon.astro';
+import { industries, themes, type IndustryId, type ThemeId } from '../../data/site';
+import { countries } from '../../data/partners';
+import { getDcs, dcCountry } from '../../lib/data';
+
+const dcs = await getDcs();
+const themeIds = Object.keys(themes) as ThemeId[];
+const industryIds = Object.keys(industries) as IndustryId[];
+const usedCountries = countries.filter((c) => dcs.some((d) => dcCountry(d) === c));
+---
+<BaseLayout
+  title="Doctoral Candidates"
+  description="Meet the 13 ENGAGE doctoral candidates and their research projects on AI, robotics and mechanics for mobile working machines."
+>
+  <PageHero
+    eyebrow="13 projects · 6 academic hosts · 11 industry partners"
+    title="Doctoral Candidates"
+    lead="Each ENGAGE doctoral candidate works on an Industrial Doctorate, supervised jointly by an academic host and an industrial partner. Explore their backgrounds, research questions and the teams behind them."
+    image="/images/news/training-group.webp"
+  />
+
+  <section class="section section--tight dcs-index">
+    <div class="container">
+      <div class="filters" data-filters>
+        <div class="filters__row">
+          <div class="filters__group" role="group" aria-label="Research theme">
+            <button type="button" class="is-active" data-theme-filter="all">All themes</button>
+            {themeIds.map((id) => <button type="button" data-theme-filter={id}>{themes[id].short}</button>)}
+          </div>
+          <label class="filters__search">
+            <Icon name="search" size={18} />
+            <span class="sr-only">Search doctoral candidates</span>
+            <input type="search" placeholder="Search names, topics, partners…" data-search />
+          </label>
+        </div>
+        <div class="filters__row">
+          <label class="filters__select">
+            <span>Industry</span>
+            <select data-industry>
+              <option value="all">All industries</option>
+              {industryIds.map((id) => <option value={id}>{industries[id].label}</option>)}
+            </select>
+          </label>
+          <label class="filters__select">
+            <span>Host country</span>
+            <select data-country>
+              <option value="all">All countries</option>
+              {usedCountries.map((c) => <option value={c}>{c}</option>)}
+            </select>
+          </label>
+          <p class="filters__count" aria-live="polite"><strong data-count-out>{dcs.length}</strong> of {dcs.length} projects</p>
+        </div>
+      </div>
+
+      <ul class="dcs-grid">
+        {
+          dcs.map((dc) => (
+            <li data-reveal>
+              <DcCard dc={dc} />
+            </li>
+          ))
+        }
+      </ul>
+      <p class="dcs-empty" data-empty hidden>No projects match these filters. <button type="button" data-reset>Clear filters</button></p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .filters {
+    display: grid;
+    gap: 14px;
+    padding: 18px;
+    margin-bottom: 36px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-elev);
+    position: sticky;
+    top: calc(var(--header-h) + 8px);
+    z-index: 5;
+  }
+  .filters__row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .filters__group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .filters__group button {
+    padding: 8px 15px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+    font-size: 0.9rem;
+  }
+  .filters__group button:hover {
+    color: var(--text);
+    border-color: var(--text-2);
+  }
+  .filters__group button.is-active {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .filters__search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1 1 260px;
+    max-width: 380px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg);
+    color: var(--muted);
+  }
+  .filters__search:focus-within {
+    border-color: var(--green);
+  }
+  .filters__search input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 0;
+    border: 0;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.95rem;
+    outline: none;
+  }
+  .filters__select {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .filters__select select {
+    padding: 8px 34px 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: var(--bg)
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23bcd1c6' stroke-width='2.5'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")
+      no-repeat right 12px center;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    appearance: none;
+    cursor: pointer;
+  }
+  .filters__count {
+    margin: 0 0 0 auto;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .filters__count strong {
+    color: var(--green);
+  }
+  .dcs-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 22px;
+  }
+  .dcs-grid li[hidden] {
+    display: none;
+  }
+  .dcs-empty {
+    padding: 48px 0;
+    text-align: center;
+    color: var(--muted);
+  }
+  .dcs-empty button {
+    margin-left: 8px;
+    background: none;
+    border: 0;
+    color: var(--green);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  @media (max-width: 700px) {
+    .filters {
+      position: static;
+    }
+    .filters__search {
+      max-width: none;
+    }
+    .filters__count {
+      margin: 0;
+      width: 100%;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-filters]');
+  const items = [...document.querySelectorAll<HTMLElement>('.dcs-grid > li')];
+  const search = root?.querySelector<HTMLInputElement>('[data-search]');
+  const industry = root?.querySelector<HTMLSelectElement>('[data-industry]');
+  const country = root?.querySelector<HTMLSelectElement>('[data-country]');
+  const countOut = root?.querySelector('[data-count-out]');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+  let theme = 'all';
+
+  const params = new URLSearchParams(window.location.search);
+  if (industry && params.get('industry')) industry.value = params.get('industry')!;
+  if (country && params.get('country')) country.value = params.get('country')!;
+  if (params.get('theme')) theme = params.get('theme')!;
+
+  const apply = () => {
+    const q = (search?.value ?? '').trim().toLowerCase();
+    const ind = industry?.value ?? 'all';
+    const ctry = country?.value ?? 'all';
+    let shown = 0;
+    for (const li of items) {
+      const card = li.querySelector<HTMLElement>('[data-dc-card]')!;
+      const ok =
+        (theme === 'all' || card.dataset.theme === theme) &&
+        (ind === 'all' || (card.dataset.industries ?? '').split(' ').includes(ind)) &&
+        (ctry === 'all' || card.dataset.country === ctry) &&
+        (!q || (card.dataset.search ?? '').includes(q));
+      li.hidden = !ok;
+      if (ok) {
+        shown++;
+        li.classList.add('is-visible');
+      }
+    }
+    if (countOut) countOut.textContent = String(shown);
+    if (empty) empty.hidden = shown > 0;
+    for (const b of root?.querySelectorAll<HTMLButtonElement>('[data-theme-filter]') ?? []) b.classList.toggle('is-active', b.dataset.themeFilter === theme);
+    const next = new URLSearchParams();
+    if (theme !== 'all') next.set('theme', theme);
+    if (ind !== 'all') next.set('industry', ind);
+    if (ctry !== 'all') next.set('country', ctry);
+    const qs = next.toString();
+    history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+  };
+
+  for (const b of root?.querySelectorAll<HTMLButtonElement>('[data-theme-filter]') ?? []) {
+    b.addEventListener('click', () => {
+      theme = b.dataset.themeFilter!;
+      apply();
+    });
+  }
+  search?.addEventListener('input', apply);
+  industry?.addEventListener('change', apply);
+  country?.addEventListener('change', apply);
+  document.querySelector('[data-reset]')?.addEventListener('click', () => {
+    theme = 'all';
+    if (search) search.value = '';
+    if (industry) industry.value = 'all';
+    if (country) country.value = 'all';
+    apply();
+  });
+  apply();
+</script>

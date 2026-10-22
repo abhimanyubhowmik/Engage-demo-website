@@ -1,0 +1,956 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import DcCard from '../components/DcCard.astro';
+import NewsCard from '../components/NewsCard.astro';
+import PartnerMap from '../components/PartnerMap.astro';
+import PartnerLogo from '../components/PartnerLogo.astro';
+import PointCloudViewer from '../components/PointCloudViewer.astro';
+import { industries, themes, type IndustryId, type ThemeId } from '../data/site';
+import { getDcs, getNews, partners, dcPath } from '../lib/data';
+import { url, dcLabel } from '../lib/url';
+
+const dcs = await getDcs();
+const news = (await getNews()).slice(0, 3);
+const academic = partners.filter((p) => p.type === 'academic').length;
+const companies = partners.filter((p) => p.type === 'industry').length;
+const keywords = [...new Set(dcs.flatMap((d) => d.data.keywords))];
+const rotating = ['worksite.', 'mine.', 'forest.', 'farm.', 'harbour.', 'real world.'];
+const industryOrder: IndustryId[] = ['construction', 'mining', 'forestry', 'agriculture', 'logistics'];
+const themeOrder: ThemeId[] = ['perception', 'control', 'safety', 'simulation'];
+const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
+---
+<BaseLayout>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__media" aria-hidden="true">
+      <picture>
+        <source media="(max-width: 700px)" srcset={url('/images/photos/forest-portrait.webp')} />
+        <img
+          src={url('/images/photos/forest-hero.webp')}
+          srcset={`${url('/images/photos/forest-hero-md.webp')} 1280w, ${url('/images/photos/forest-hero.webp')} 2400w`}
+          sizes="100vw"
+          alt=""
+          fetchpriority="high"
+        />
+      </picture>
+    </div>
+    <div class="hero__scan" aria-hidden="true"></div>
+    <div class="container hero__content">
+      <p class="eyebrow">Marie Skłodowska-Curie Doctoral Network · 2025–2029</p>
+      <h1 class="display hero__title">
+        Intelligence<br />for the
+        <span class="hero__rotator" data-rotator>
+          {rotating.map((w, i) => <span class:list={{ 'is-active': i === rotating.length - 1 }}>{w}</span>)}
+        </span>
+      </h1>
+      <p class="lead hero__lead">
+        Future engineers for safer, smarter and more sustainable mobile machines. ENGAGE trains {dcs.length} doctoral candidates in AI, robotics
+        and mechanics — side by side with Europe’s leading machine manufacturers.
+      </p>
+      <div class="hero__actions">
+        <a class="btn" href={url('/doctoral-candidates/')}>Meet the doctoral candidates <Icon name="arrow-right" /></a>
+        <a class="btn btn--ghost" href={url('/research/')}>Explore the research</a>
+      </div>
+    </div>
+    <div class="hero__ticker" aria-hidden="true">
+      <div class="hero__ticker-track">
+        {
+          [0, 1].map(() => (
+            <div class="hero__ticker-group">
+              {keywords.map((k) => (
+                <>
+                  <span>{k}</span>
+                  <i />
+                </>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats" aria-label="ENGAGE in numbers">
+    <div class="container stats__grid">
+      <div class="stat" data-reveal><strong data-count={dcs.length}>{dcs.length}</strong><span>Doctoral candidates</span></div>
+      <div class="stat" data-reveal style="--reveal-delay:80ms"><strong data-count={academic}>{academic}</strong><span>Academic groups</span></div>
+      <div class="stat" data-reveal style="--reveal-delay:160ms"><strong data-count={companies}>{companies}</strong><span>Industry partners</span></div>
+      <div class="stat" data-reveal style="--reveal-delay:240ms"><strong data-count="4">4</strong><span>Countries</span></div>
+      <div class="stat" data-reveal style="--reveal-delay:320ms"><strong data-count="48">48</strong><span>Months of research</span></div>
+    </div>
+  </section>
+
+  <!-- MISSION -->
+  <section class="section mission">
+    <div class="container mission__grid">
+      <div data-reveal>
+        <p class="eyebrow">Why ENGAGE</p>
+        <h2 class="display h2">The machines behind our economy are getting a brain.</h2>
+      </div>
+      <div class="mission__text" data-reveal style="--reveal-delay:120ms">
+        <p class="lead">
+          Mobile working machines are everywhere in mining, construction, harbours, forestry and farming — and vital to a sustainable,
+          productive society.
+        </p>
+        <p>
+          Ambitious goals for sustainability, productivity and safety, coupled with a shortage of skilled people, have brought Europe’s
+          mobile-machine ecosystem together in this network of Industrial Doctorates. Each doctoral candidate is supervised jointly by a university
+          and a company, and spends time in both.
+        </p>
+        <a class="link-arrow" href={url('/research/')}>Our research objectives <Icon name="arrow-right" /></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INDUSTRIES -->
+  <section class="section section--tight industries" aria-labelledby="industries-title">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Where our machines work</p>
+          <h2 class="display h2" id="industries-title">One network, five industries</h2>
+        </div>
+        <a class="link-arrow" href={url('/doctoral-candidates/')}>All projects <Icon name="arrow-right" /></a>
+      </div>
+      <div class="industries__grid">
+        {
+          industryOrder.map((id, i) => {
+            const ind = industries[id];
+            const count = dcs.filter((d) => d.data.industries.includes(id)).length;
+            return (
+              <a class:list={['industry', { 'industry--lead': i === 0 }]} href={url(`/doctoral-candidates/?industry=${id}`)} data-reveal style={`--reveal-delay:${i * 70}ms`}>
+                <img src={url(ind.image)} alt="" loading="lazy" decoding="async" />
+                <span class="industry__body">
+                  <span class="industry__count">{count} {count === 1 ? 'project' : 'projects'}</span>
+                  <span class="industry__title">{ind.label}</span>
+                  <span class="industry__blurb">{ind.blurb}</span>
+                </span>
+                <span class="industry__arrow">
+                  <Icon name="arrow-up-right" size={22} />
+                </span>
+              </a>
+            );
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- POINT CLOUD -->
+  <section class="section perception">
+    <div class="container perception__grid">
+      <div data-reveal>
+        <p class="eyebrow">Perception</p>
+        <h2 class="display h2 perception__title">See the worksite the way a machine does</h2>
+        <p class="lead">
+          Before a machine can dig, haul or harvest on its own, it has to understand a world that changes every hour — soil, rocks, trees, other
+          machines and people.
+        </p>
+        <p class="muted">
+          Our perception projects fuse LiDAR, cameras, radar, GNSS/IMU and the machine’s own proprioception into 3D and 4D representations
+          that capture geometry, semantics and change over time.
+        </p>
+        <ul class="perception__dcs">
+          {
+            perceptionDcs.map((dc) => (
+              <li>
+                <a href={url(dcPath(dc))}>
+                  <span class="badge-dc">{dcLabel(dc.data.number)}</span>
+                  <span>{dc.data.shortTitle}</span>
+                  <Icon name="arrow-right" size={16} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div data-reveal style="--reveal-delay:120ms">
+        <PointCloudViewer />
+      </div>
+    </div>
+  </section>
+
+  <!-- RESEARCH THEMES -->
+  <section class="section section--paper themes" aria-labelledby="themes-title">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Research objectives</p>
+          <h2 class="display h2" id="themes-title">Four objectives, one goal</h2>
+          <p class="lead">
+            New methods, processes and algorithms — using robotisation and AI — with proof-of-concept on representative cases, to make mobile
+            working machine industries more sustainable, productive and safe.
+          </p>
+        </div>
+        <a class="btn btn--ghost" href={url('/research/')}>Read the objectives</a>
+      </div>
+      <div class="themes__grid">
+        {
+          themeOrder.map((id, i) => {
+            const t = themes[id];
+            const list = dcs.filter((d) => d.data.theme === id);
+            return (
+              <article class="theme" data-reveal style={`--reveal-delay:${i * 80}ms`}>
+                <div class="theme__media">
+                  <img src={url(t.image.replace('.webp', '-sm.webp'))} alt="" loading="lazy" decoding="async" />
+                  <span class="theme__num">0{t.objective}</span>
+                </div>
+                <div class="theme__body">
+                  <h3>{t.label}</h3>
+                  <p>{t.blurb}</p>
+                  <p class="theme__dcs">
+                    {list.map((dc) => (
+                      <a href={url(dcPath(dc))} title={dc.data.shortTitle}>
+                        {dcLabel(dc.data.number)}
+                      </a>
+                    ))}
+                  </p>
+                </div>
+              </article>
+            );
+          })
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- DC CAROUSEL -->
+  <section class="section people" aria-labelledby="people-title">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">The people</p>
+          <h2 class="display h2" id="people-title">Meet our doctoral candidates</h2>
+          <p class="lead">Thirteen doctoral projects — each co-supervised by a university and an industrial partner.</p>
+        </div>
+        <div class="carousel-nav">
+          <button type="button" class="carousel-btn" data-carousel-prev aria-label="Previous"><Icon name="arrow-left" /></button>
+          <button type="button" class="carousel-btn" data-carousel-next aria-label="Next"><Icon name="arrow-right" /></button>
+        </div>
+      </div>
+    </div>
+    <div class="carousel" data-carousel>
+      <ul class="carousel__track" data-carousel-track>
+        {
+          dcs.map((dc) => (
+            <li>
+              <DcCard dc={dc} compact />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <div class="container people__cta">
+      <a class="btn" href={url('/doctoral-candidates/')}>See all doctoral candidates <Icon name="arrow-right" /></a>
+      <a class="btn btn--ghost" href={url('/supervisors/')}>Meet the supervisors</a>
+    </div>
+  </section>
+
+  <!-- MAP -->
+  <section class="section section--elev map-teaser" aria-labelledby="map-title">
+    <div class="container map-teaser__grid">
+      <div data-reveal>
+        <p class="eyebrow">Consortium</p>
+        <h2 class="display h2" id="map-title">Across Europe’s machine heartland</h2>
+        <p class="lead">
+          Universities, research institutes, machine manufacturers and technology suppliers in Finland, Sweden, Germany and Austria — linked by
+          the doctoral projects they share.
+        </p>
+        <div class="map-teaser__counts">
+          <div><strong>{partners.filter((p) => p.role === 'beneficiary').length}</strong><span>Beneficiaries</span></div>
+          <div><strong>{partners.filter((p) => p.role === 'associated').length}</strong><span>Associated partners</span></div>
+          <div><strong>{new Set(partners.map((p) => p.city)).size}</strong><span>Cities</span></div>
+        </div>
+        <a class="btn" href={url('/consortium/')}>Explore the map <Icon name="arrow-right" /></a>
+      </div>
+      <div data-reveal style="--reveal-delay:120ms">
+        <PartnerMap compact />
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWS -->
+  <section class="section" aria-labelledby="news-title">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">News & events</p>
+          <h2 class="display h2" id="news-title">Latest from the network</h2>
+        </div>
+        <a class="link-arrow" href={url('/news/')}>All news <Icon name="arrow-right" /></a>
+      </div>
+      <div class="news-grid">
+        {
+          news.map((post, i) => (
+            <div data-reveal style={`--reveal-delay:${i * 80}ms`}>
+              <NewsCard post={post} />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTNER LOGOS -->
+  <section class="section section--tight logos" aria-labelledby="logos-title">
+    <div class="container">
+      <p class="eyebrow" id="logos-title">Our partners</p>
+      <ul class="logos__grid">
+        {
+          partners.map((p) => (
+            <li>
+              <a href={p.website} target="_blank" rel="noopener" title={p.name}>
+                <PartnerLogo partner={p} />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <img class="cta__bg" src={url('/images/photos/forest-ground.webp')} alt="" loading="lazy" />
+    <div class="container cta__inner">
+      <h2 class="display h2">Building the next generation of mobile working machines?</h2>
+      <p class="lead">Talk to us about collaboration, training events or the research behind ENGAGE.</p>
+      <div class="hero__actions">
+        <a class="btn" href={url('/contact/')}>Get in touch <Icon name="arrow-right" /></a>
+        <a class="btn btn--ghost" href={url('/news/')}>News & events</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* hero */
+  .hero {
+    position: relative;
+    min-height: max(640px, 100svh);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    isolation: isolate;
+    overflow: hidden;
+  }
+  .hero__media {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+  }
+  .hero__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 70% 40%;
+    animation: hero-zoom 24s ease-out both;
+  }
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    background:
+      linear-gradient(90deg, rgb(4 14 11 / 0.92) 0%, rgb(4 14 11 / 0.65) 38%, rgb(4 14 11 / 0.05) 70%),
+      linear-gradient(180deg, rgb(4 14 11 / 0.55) 0%, transparent 25%, transparent 60%, var(--bg) 100%);
+  }
+  .hero__scan {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, rgb(95 227 161 / 0.09) 48%, rgb(95 227 161 / 0.22) 50%, transparent 52%);
+    background-size: 100% 240%;
+    mix-blend-mode: screen;
+    animation: hero-scan 7s cubic-bezier(0.6, 0, 0.4, 1) infinite;
+  }
+  @keyframes hero-scan {
+    from {
+      background-position: 0 120%;
+    }
+    to {
+      background-position: 0 -120%;
+    }
+  }
+  .hero__content {
+    padding-top: calc(var(--header-h) + 60px);
+    padding-bottom: 56px;
+  }
+  .hero__title {
+    font-size: clamp(2.1rem, 8.2vw, 7.4rem);
+    margin-bottom: 28px;
+    max-width: 12ch;
+  }
+  .hero__rotator {
+    display: grid;
+    color: var(--orange);
+  }
+  .hero__rotator span {
+    grid-area: 1 / 1;
+    opacity: 0;
+    transform: translateY(0.35em);
+    transition:
+      opacity 0.6s var(--ease),
+      transform 0.6s var(--ease);
+    white-space: nowrap;
+  }
+  .hero__rotator span.is-active {
+    opacity: 1;
+    transform: none;
+  }
+  .hero__lead {
+    color: var(--text);
+    opacity: 0.92;
+    max-width: 52ch;
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+  .hero__ticker {
+    position: relative;
+    border-block: 1px solid rgb(255 255 255 / 0.08);
+    background: rgb(10 12 40 / 0.72);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .hero__ticker-track {
+    display: flex;
+    width: max-content;
+    animation: ticker 70s linear infinite;
+  }
+  .hero__ticker-group {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 16px 11px;
+    font-family: var(--font-display);
+    font-stretch: 112%;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .hero__ticker-group span:nth-of-type(3n + 1) {
+    color: var(--green);
+  }
+  .hero__ticker-group span:nth-of-type(3n + 2) {
+    color: var(--text);
+  }
+  .hero__ticker-group span:nth-of-type(3n) {
+    color: var(--orange);
+  }
+  .hero__ticker-group i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.5);
+  }
+  @keyframes ticker {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* stats */
+  .stats {
+    border-bottom: 1px solid var(--line);
+  }
+  .stats__grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+  .stat {
+    padding: 34px 12px;
+    text-align: center;
+    border-left: 1px solid var(--line);
+  }
+  .stat:first-child {
+    border-left: 0;
+  }
+  .stat strong {
+    display: block;
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-weight: 850;
+    font-size: clamp(2.4rem, 4.6vw, 3.8rem);
+    line-height: 1;
+    color: var(--text);
+  }
+  .stat:nth-child(odd) strong {
+    color: var(--green);
+  }
+  .stat span {
+    display: block;
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: 0.88rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* mission */
+  .mission__grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(32px, 6vw, 96px);
+    align-items: start;
+  }
+  .mission__text p:not(.lead) {
+    color: var(--text-2);
+  }
+
+  /* industries */
+  .industries__grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr;
+    grid-template-rows: repeat(2, minmax(260px, auto));
+    gap: 16px;
+  }
+  .industry {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 260px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    text-decoration: none;
+    isolation: isolate;
+    border: 1px solid var(--line);
+  }
+  .industry--lead {
+    grid-row: span 2;
+  }
+  .industry img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    transition: transform 1s var(--ease);
+  }
+  .industry::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgb(4 14 11 / 0.1) 10%, rgb(4 14 11 / 0.55) 45%, rgb(4 14 11 / 0.94) 100%);
+  }
+  .industry:hover img {
+    transform: scale(1.06);
+  }
+  .industry__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 24px;
+  }
+  .industry__count {
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 700;
+  }
+  .industry__title {
+    font-family: var(--font-display);
+    font-stretch: 118%;
+    font-weight: 820;
+    text-transform: uppercase;
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    line-height: 1;
+  }
+  .industry--lead .industry__title {
+    font-size: clamp(1.7rem, 2.7vw, 2.4rem);
+  }
+  .industry__blurb {
+    color: var(--text-2);
+    font-size: 0.93rem;
+    max-width: 40ch;
+  }
+  .industry__arrow {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgb(4 14 11 / 0.6);
+    border: 1px solid rgb(255 255 255 / 0.2);
+    transition:
+      background-color 0.3s,
+      color 0.3s,
+      transform 0.3s var(--ease);
+  }
+  .industry:hover .industry__arrow {
+    background: var(--orange);
+    color: var(--ink);
+    transform: rotate(45deg);
+  }
+
+  /* perception */
+  .perception__grid {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+  }
+  .perception__title {
+    font-size: clamp(2rem, 3.4vw, 2.9rem);
+  }
+  .perception__dcs {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .perception__dcs li {
+    border-bottom: 1px solid var(--line);
+  }
+  .perception__dcs a {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 2px;
+    text-decoration: none;
+    font-weight: 550;
+  }
+  .perception__dcs a :global(svg) {
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+  .perception__dcs a:hover {
+    color: var(--green);
+  }
+  .perception__dcs a:hover :global(svg) {
+    transform: translateX(3px);
+    color: var(--green);
+  }
+
+  /* themes */
+  .themes__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .theme {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    background: #fff;
+    border: 1px solid var(--paper-2);
+    overflow: hidden;
+    box-shadow: 0 18px 40px -30px rgb(13 38 32 / 0.5);
+  }
+  .theme__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--ink);
+  }
+  .theme__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .theme__num {
+    position: absolute;
+    left: 16px;
+    bottom: 10px;
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-weight: 850;
+    font-size: 2.6rem;
+    line-height: 1;
+    color: #fff;
+  }
+  .theme__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px 20px 22px;
+  }
+  .theme__body h3 {
+    font-size: 1.2rem;
+  }
+  .theme__body p {
+    font-size: 0.93rem;
+    color: var(--ink-2);
+  }
+  .theme__dcs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: auto 0 0 !important;
+  }
+  .theme__dcs a {
+    font-family: var(--font-display);
+    font-stretch: 115%;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--paper);
+    border: 1px solid var(--paper-2);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .theme__dcs a:hover {
+    background: var(--orange);
+    border-color: var(--orange);
+  }
+
+  /* carousel */
+  .carousel-nav {
+    display: flex;
+    gap: 10px;
+  }
+  .carousel-btn {
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .carousel-btn:hover {
+    background: var(--green);
+    color: var(--ink);
+    border-color: var(--green);
+  }
+  .carousel__track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: clamp(240px, 23vw, 300px);
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 4px max(var(--gutter), calc((100vw - var(--container)) / 2)) 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: max(var(--gutter), calc((100vw - var(--container)) / 2));
+    scrollbar-width: none;
+  }
+  .carousel__track::-webkit-scrollbar {
+    display: none;
+  }
+  .carousel__track li {
+    scroll-snap-align: start;
+  }
+  .people__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  /* map teaser */
+  .map-teaser__grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+  }
+  .map-teaser__counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin: 28px 0 32px;
+  }
+  .map-teaser__counts strong {
+    display: block;
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-weight: 850;
+    font-size: 2.6rem;
+    line-height: 1;
+    color: var(--orange);
+  }
+  .map-teaser__counts span {
+    color: var(--muted);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* news */
+  .news-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  /* logos */
+  .logos__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+  }
+  .logos__grid a {
+    display: block;
+    transition: transform 0.25s var(--ease);
+  }
+  .logos__grid a:hover {
+    transform: translateY(-3px);
+  }
+  .logos__grid :global(.logo-plate) {
+    height: 80px;
+  }
+  .logos__grid :global(.logo-plate img) {
+    max-height: 50px;
+    max-width: 88%;
+  }
+  .logos__grid :global(.logo-plate--text) {
+    font-size: 0.85rem;
+  }
+
+  /* cta */
+  .cta {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: clamp(80px, 11vw, 160px);
+    text-align: center;
+  }
+  .cta__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+  }
+  .cta::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, var(--bg) 0%, rgb(6 18 14 / 0.7) 35%, rgb(6 18 14 / 0.75) 65%, #040c09 100%);
+  }
+  .cta__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .cta__inner h2 {
+    max-width: 18ch;
+  }
+  .cta__inner .lead {
+    margin-inline: auto;
+  }
+
+  @media (max-width: 1080px) {
+    .themes__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .industries__grid {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: none;
+    }
+    .industry--lead {
+      grid-row: auto;
+      grid-column: span 2;
+      min-height: 340px;
+    }
+  }
+  @media (max-width: 900px) {
+    .mission__grid,
+    .perception__grid,
+    .map-teaser__grid {
+      grid-template-columns: 1fr;
+    }
+    .news-grid {
+      grid-template-columns: 1fr;
+    }
+    .stats__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .stat:nth-child(4) {
+      border-left: 0;
+    }
+    .stat:nth-child(n + 4) {
+      border-top: 1px solid var(--line);
+    }
+  }
+  @media (max-width: 600px) {
+    .industries__grid,
+    .themes__grid {
+      grid-template-columns: 1fr;
+    }
+    .industry--lead {
+      grid-column: auto;
+    }
+    .stats__grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .stat {
+      padding: 24px 8px;
+    }
+    .stat:nth-child(odd) {
+      border-left: 0;
+    }
+    .stat:nth-child(4) {
+      border-left: 1px solid var(--line);
+    }
+    .stat:nth-child(n + 3) {
+      border-top: 1px solid var(--line);
+    }
+    .stat:last-child {
+      grid-column: span 2;
+    }
+    .carousel__track {
+      grid-auto-columns: 78vw;
+    }
+    .hero__media img {
+      object-position: 62% 50%;
+    }
+    .hero::before {
+      background: linear-gradient(180deg, rgb(4 14 11 / 0.6) 0%, rgb(4 14 11 / 0.35) 30%, rgb(4 14 11 / 0.85) 70%, var(--bg) 100%);
+    }
+  }
+</style>
+
+<script>
+  // rotating headline word
+  const rot = document.querySelector<HTMLElement>('[data-rotator]');
+  if (rot && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const words = [...rot.children] as HTMLElement[];
+    let i = words.length - 1;
+    const step = () => {
+      words[i].classList.remove('is-active');
+      i = (i + 1) % words.length;
+      words[i].classList.add('is-active');
+      setTimeout(step, i === words.length - 1 ? 4200 : 1900);
+    };
+    setTimeout(step, 3200);
+  }
+  // carousel buttons
+  const track = document.querySelector<HTMLElement>('[data-carousel-track]');
+  const by = () => (track?.querySelector('li')?.getBoundingClientRect().width ?? 300) + 20;
+  document.querySelector('[data-carousel-prev]')?.addEventListener('click', () => track?.scrollBy({ left: -by(), behavior: 'smooth' }));
+  document.querySelector('[data-carousel-next]')?.addEventListener('click', () => track?.scrollBy({ left: by(), behavior: 'smooth' }));
+</script>

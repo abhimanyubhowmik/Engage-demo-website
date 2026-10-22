@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import SupervisorCard from '../components/SupervisorCard.astro';
+import { getSupervisorsWithDcs } from '../lib/data';
+
+const all = await getSupervisorsWithDcs();
+const academic = all.filter((s) => s.kind === 'academic');
+const industry = all.filter((s) => s.kind === 'industry');
+---
+<BaseLayout
+  title="Supervisors"
+  description="The academic and industrial supervisors who guide the ENGAGE doctoral candidates."
+>
+  <PageHero
+    eyebrow={`${academic.length} academic · ${industry.length} industrial`}
+    title="Supervisors"
+    lead="Every ENGAGE project is guided by a team: professors at the host university and experts at the industrial partner, who together shape the research, the secondments and the doctoral candidate’s career."
+    image="/images/news/training-walk.webp"
+  />
+  <section class="section section--tight">
+    <div class="container">
+      <div class="sup-tabs" role="group" aria-label="Filter supervisors" data-sup-tabs>
+        <button type="button" class="is-active" data-kind="all">All <span>{all.length}</span></button>
+        <button type="button" data-kind="academic">Academic <span>{academic.length}</span></button>
+        <button type="button" data-kind="industry">Industrial <span>{industry.length}</span></button>
+      </div>
+
+      <h2 class="sup-heading" data-group="academic">Academic supervisors</h2>
+      <ul class="sup-grid" data-group="academic">
+        {academic.map((s) => <li data-reveal><SupervisorCard supervisor={s} /></li>)}
+      </ul>
+      <h2 class="sup-heading" data-group="industry">Industrial supervisors</h2>
+      <ul class="sup-grid" data-group="industry">
+        {industry.map((s) => <li data-reveal><SupervisorCard supervisor={s} /></li>)}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sup-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    margin-bottom: 40px;
+  }
+  .sup-tabs button {
+    padding: 9px 18px;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--text-2);
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .sup-tabs button span {
+    margin-left: 6px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .sup-tabs button.is-active {
+    background: var(--green);
+    color: var(--ink);
+  }
+  .sup-tabs button.is-active span {
+    color: var(--ink);
+  }
+  .sup-heading {
+    font-size: 1.1rem;
+    font-stretch: 112%;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 8px 0 20px;
+  }
+  .sup-grid {
+    list-style: none;
+    margin: 0 0 56px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
+  [data-group][hidden] {
+    display: none;
+  }
+  @media (max-width: 400px) {
+    .sup-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const tabs = document.querySelector<HTMLElement>('[data-sup-tabs]');
+  const groups = document.querySelectorAll<HTMLElement>('[data-group]');
+  const show = (kind: string) => {
+    for (const b of tabs?.querySelectorAll<HTMLButtonElement>('button') ?? []) b.classList.toggle('is-active', b.dataset.kind === kind);
+    for (const g of groups) g.hidden = kind !== 'all' && g.dataset.group !== kind;
+  };
+  for (const b of tabs?.querySelectorAll<HTMLButtonElement>('button') ?? []) b.addEventListener('click', () => show(b.dataset.kind!));
+  // make sure a deep link to a supervisor in a hidden group is visible
+  const target = window.location.hash && document.querySelector(window.location.hash);
+  if (target) show('all');
+</script>

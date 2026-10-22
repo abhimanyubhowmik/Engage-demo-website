@@ -1,0 +1,20 @@
+---
+import { initials, url } from '../lib/url';
+interface Props {
+  name: string;
+  photo?: string;
+  kind?: 'academic' | 'industry';
+  class?: string;
+  loading?: 'lazy' | 'eager';
+}
+const { name, photo, kind = 'academic', class: cls, loading = 'lazy' } = Astro.props;
+---
+{
+  photo ? (
+    <img class={cls} src={url(photo)} alt={`Portrait of ${name}`} loading={loading} decoding="async" />
+  ) : (
+    <span class={`monogram ${kind === 'industry' ? 'monogram--industry' : ''} ${cls ?? ''}`} aria-hidden="true">
+      {initials(name)}
+    </span>
+  )
+}

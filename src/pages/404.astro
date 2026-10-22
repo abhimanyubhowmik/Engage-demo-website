@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { url } from '../lib/url';
+---
+<BaseLayout title="Page not found">
+  <section class="nf">
+    <img src={url('/images/generated/offroad-scan.webp')} alt="" />
+    <div class="container">
+      <p class="eyebrow">404 · Off the map</p>
+      <h1 class="display h1">This terrain isn’t traversable.</h1>
+      <p class="lead">The page you are looking for has moved or never existed.</p>
+      <a class="btn" href={url('/')}>Back to the homepage <Icon name="arrow-right" /></a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    position: relative;
+    isolation: isolate;
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    padding-top: var(--header-h);
+  }
+  .nf img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.55;
+  }
+  .nf .lead {
+    margin-bottom: 28px;
+  }
+</style>
