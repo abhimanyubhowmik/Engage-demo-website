@@ -1,0 +1,18 @@
+---
+import type { Partner } from '../data/partners';
+import { url } from '../lib/url';
+interface Props {
+  partner: Partner;
+  class?: string;
+}
+const { partner, class: cls } = Astro.props;
+---
+{
+  partner.logo ? (
+    <span class={`logo-plate ${cls ?? ''}`}>
+      <img src={url(partner.logo)} alt={partner.name} loading="lazy" decoding="async" />
+    </span>
+  ) : (
+    <span class={`logo-plate logo-plate--text ${cls ?? ''}`}>{partner.short === 'UMU' ? 'UMEÅ UNIVERSITY' : partner.name.toUpperCase()}</span>
+  )
+}

@@ -1,0 +1,180 @@
+---
+import Logo from './Logo.astro';
+import EuEmblem from './EuEmblem.astro';
+import Icon from './Icon.astro';
+import { nav, site } from '../data/site';
+import { url } from '../lib/url';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container">
+    <div class="site-footer__top">
+      <div class="site-footer__brand">
+        <Logo width={170} />
+        <p>
+          Educating Europe’s future engineers for the next generation of mobile working machines — AI-driven sustainability,
+          productivity and safety.
+        </p>
+      </div>
+      <nav class="site-footer__nav" aria-label="Footer">
+        <p class="site-footer__title">Explore</p>
+        <ul>
+          <li><a href={url('/')}>Home</a></li>
+          {nav.map((item) => <li><a href={url(item.href)}>{item.label}</a></li>)}
+          <li><a href={url('/recruitment/')}>Recruitment</a></li>
+        </ul>
+      </nav>
+      <div class="site-footer__contact">
+        <p class="site-footer__title">Contact</p>
+        {
+          site.contacts.map((c) => (
+            <p>
+              <span class="muted">{c.role}</span>
+              <br />
+              {c.name}, {c.org}
+              <br />
+              <a href={`mailto:${c.email}`}>
+                <Icon name="mail" size={15} /> {c.email}
+              </a>
+            </p>
+          ))
+        }
+      </div>
+    </div>
+    <div class="site-footer__funding">
+      <div class="site-footer__eu">
+        <EuEmblem width={84} />
+        <p class="site-footer__eu-label">Funded by<br />the European Union</p>
+      </div>
+      <p class="site-footer__statement">
+        {site.fundingStatement}
+        <span>{site.disclaimer}</span>
+      </p>
+    </div>
+    <div class="site-footer__bottom">
+      <p>© {year} ENGAGE · MSCA Doctoral Network · Grant Agreement No. {site.grantNumber}</p>
+      <ul>
+        <li><a href={url('/imprint/')}>Imprint</a></li>
+        <li><a href={url('/privacy-policy/')}>Privacy Policy</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: #040c09;
+    border-top: 1px solid var(--line);
+    padding-top: clamp(56px, 7vw, 88px);
+    font-size: 0.95rem;
+    color: var(--text-2);
+  }
+  .site-footer__top {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1.2fr;
+    gap: 40px;
+    padding-bottom: 48px;
+  }
+  .site-footer__brand p {
+    margin-top: 20px;
+    max-width: 38ch;
+  }
+  .site-footer__title {
+    font-family: var(--font-display);
+    font-stretch: 110%;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 0.78rem;
+    color: var(--green);
+    margin-bottom: 14px;
+  }
+  .site-footer__nav ul,
+  .site-footer__bottom ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-footer__nav li + li {
+    margin-top: 6px;
+  }
+  .site-footer a {
+    color: var(--text);
+    text-decoration: none;
+  }
+  .site-footer a:hover {
+    color: var(--green);
+  }
+  .site-footer__contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    word-break: break-all;
+  }
+  .site-footer__funding {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: center;
+    padding: 28px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+  }
+  .site-footer__eu {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .site-footer__eu-label {
+    margin: 0;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .site-footer__statement {
+    margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.6;
+  }
+  .site-footer__statement span {
+    display: block;
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  .site-footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    padding-block: 28px 36px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .site-footer__bottom p {
+    margin: 0;
+  }
+  .site-footer__bottom ul {
+    display: flex;
+    gap: 20px;
+  }
+  @media (max-width: 900px) {
+    .site-footer__top {
+      grid-template-columns: 1fr 1fr;
+    }
+    .site-footer__brand {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (max-width: 600px) {
+    .site-footer__top {
+      grid-template-columns: 1fr;
+    }
+    .site-footer__funding {
+      grid-template-columns: 1fr;
+      padding: 22px;
+    }
+  }
+</style>

@@ -1,0 +1,754 @@
+---
+// Build-time SVG map of the consortium. Country shapes come from world-atlas (Natural Earth 1:50m),
+// projected with d3-geo; markers group partners that sit in the same city; arcs connect each DC's
+// academic host with its industrial partner.
+import { geoConicConformal, geoPath, geoGraticule } from 'd3-geo';
+import { feature } from 'topojson-client';
+import type { Feature, FeatureCollection, Geometry } from 'geojson';
+import world from 'world-atlas/countries-50m.json';
+import PartnerLogo from './PartnerLogo.astro';
+import Icon from './Icon.astro';
+import { getDcs, getPartnersWithDcs, dcPath } from '../lib/data';
+import { url, dcLabel } from '../lib/url';
+
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+
+const W = 1000;
+const H = 1060;
+const highlight = new Set(['246', '752', '276', '040']);
+const projection = geoConicConformal()
+  .parallels([50, 66])
+  .rotate([-16.5, 0])
+  .fitExtent(
+    [
+      [30, 30],
+      [W - 30, H - 30],
+    ],
+    {
+      type: 'MultiPoint',
+      coordinates: [
+        [3.5, 46.6],
+        [31.5, 46.6],
+        [4.5, 70.4],
+        [31.5, 70.2],
+        [15, 45.6],
+      ],
+    },
+  )
+  .clipExtent([
+    [0, 0],
+    [W, H],
+  ]);
+const path = geoPath(projection).digits(1);
+const countries = (feature(world as any, (world as any).objects.countries) as unknown as FeatureCollection<Geometry>).features as Feature<
+  Geometry,
+  { name: string }
+>[];
+const shapes = countries
+  .map((f) => ({ id: String(f.id), name: f.properties.name, d: path(f) ?? '' }))
+  .filter((s) => s.d.length > 0);
+const graticule = path(geoGraticule().step([5, 5])()) ?? '';
+
+const partners = await getPartnersWithDcs();
+const dcs = await getDcs();
+
+// ---- cluster partners that fall within a few pixels of each other
+type Cluster = { id: string; x: number; y: number; members: typeof partners; label: string };
+const clusters: Cluster[] = [];
+for (const p of partners) {
+  const [x, y] = projection([p.lon, p.lat]) as [number, number];
+  const near = clusters.find((c) => Math.hypot(c.x - x, c.y - y) < 14);
+  if (near) {
+    near.members.push(p);
+    near.x = (near.x * (near.members.length - 1) + x) / near.members.length;
+    near.y = (near.y * (near.members.length - 1) + y) / near.members.length;
+  } else {
+    clusters.push({ id: `site-${clusters.length}`, x, y, members: [p], label: '' });
+  }
+}
+for (const c of clusters) {
+  c.id = `site-${c.members[0].city.toLowerCase().replace(/[^a-z]+/g, '-')}`;
+  c.label = [...new Set(c.members.map((m) => m.city))].join(' / ');
+}
+const clusterOf = (pid: string) => clusters.find((c) => c.members.some((m) => m.id === pid));
+const labelLeft = new Set(['Karlsruhe', 'Gothenburg', 'Umeå', 'Tampere', 'Espoo', 'Marktoberdorf']);
+
+// ---- collaboration arcs (host ↔ industrial partner, host ↔ co-host)
+const arcMap = new Map<string, { a: Cluster; b: Cluster; dcs: number[] }>();
+for (const dc of dcs) {
+  const ends: [string, string][] = [];
+  const [h0, ...hRest] = dc.data.host;
+  if (!h0) continue;
+  for (const p of dc.data.partners) ends.push([h0, p]);
+  for (const h of hRest) ends.push([h0, h]);
+  for (const [from, to] of ends) {
+    const a = clusterOf(from);
+    const b = clusterOf(to);
+    if (!a || !b || a === b) continue;
+    const key = [a.id, b.id].sort().join('|');
+    const entry = arcMap.get(key) ?? { a, b, dcs: [] };
+    entry.dcs.push(dc.data.number);
+    arcMap.set(key, entry);
+  }
+}
+const arcs = [...arcMap.values()].map(({ a, b, dcs: list }) => {
+  const mx = (a.x + b.x) / 2;
+  const my = (a.y + b.y) / 2;
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const len = Math.hypot(dx, dy);
+  const k = 0.22;
+  const cx = mx - (dy / len) * len * k;
+  const cy = my + (dx / len) * len * k;
+  return { a: a.id, b: b.id, d: `M${a.x.toFixed(1)} ${a.y.toFixed(1)}Q${cx.toFixed(1)} ${cy.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`, dcs: list };
+});
+
+const countryLabels = [
+  { name: 'Finland', at: [26.8, 66.9] },
+  { name: 'Sweden', at: [14.6, 62.6] },
+  { name: 'Germany', at: [10.2, 51.9] },
+  { name: 'Austria', at: [15.9, 46.75] },
+].map((l) => ({ name: l.name, xy: projection(l.at as [number, number]) as [number, number] }));
+
+const typesOf = (c: Cluster) => [...new Set(c.members.flatMap((m) => (m.role === 'associated' ? [m.type, 'associated'] : [m.type])))];
+const countBeneficiaries = partners.filter((p) => p.role === 'beneficiary').length;
+const countAssociated = partners.filter((p) => p.role === 'associated').length;
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
+---
+<div class:list={['pmap', { 'pmap--compact': compact }]} data-pmap>
+  {
+    !compact && (
+      <div class="pmap__filters" role="group" aria-label="Filter partners">
+        <button type="button" class="is-active" data-filter="all">All partners</button>
+        <button type="button" data-filter="academic">Universities & institutes</button>
+        <button type="button" data-filter="industry">Industry</button>
+        <button type="button" data-filter="associated">Associated</button>
+      </div>
+    )
+  }
+  <div class="pmap__layout">
+    <div class="pmap__stage">
+      <svg class="pmap__svg" viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="pmap-title">
+        <title id="pmap-title">Map of ENGAGE beneficiaries and partners in Finland, Sweden, Germany and Austria</title>
+        <defs>
+          <radialGradient id="pmap-glow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#5fe3a1" stop-opacity="0.55" />
+            <stop offset="100%" stop-color="#5fe3a1" stop-opacity="0" />
+          </radialGradient>
+          <linearGradient id="pmap-arc" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#5fe3a1" />
+            <stop offset="100%" stop-color="#f7a823" />
+          </linearGradient>
+        </defs>
+        <path class="pmap__graticule" d={graticule} />
+        <g class="pmap__countries">
+          {shapes.map((s) => <path d={s.d} class:list={{ 'is-member': highlight.has(s.id) }} data-name={s.name} />)}
+        </g>
+        <g class="pmap__country-labels" aria-hidden="true">
+          {countryLabels.map((l) => (
+            <text x={l.xy[0].toFixed(1)} y={l.xy[1].toFixed(1)}>
+              {l.name.toUpperCase()}
+            </text>
+          ))}
+        </g>
+        <g class="pmap__arcs" aria-hidden="true">
+          {arcs.map((a) => (
+            <path d={a.d} data-a={a.a} data-b={a.b} style={`--w:${1 + a.dcs.length * 0.6}`} />
+          ))}
+        </g>
+        <g class="pmap__markers">
+          {clusters.map((c) => {
+            const types = typesOf(c);
+            const mixed = types.includes('academic') && types.some((t) => t !== 'academic');
+            const r = 10.5 + (c.members.length - 1) * 2.5;
+            const coord = c.members.some((m) => m.coordinator);
+            const left = c.members.some((m) => labelLeft.has(m.city));
+            return (
+              <g
+                class="pmap__marker"
+                data-site={c.id}
+                data-types={types.join(' ')}
+                transform={`translate(${c.x.toFixed(1)} ${c.y.toFixed(1)})`}
+                tabindex="0"
+                role="button"
+                aria-label={`${c.label}: ${c.members.map((m) => m.name).join(', ')}`}
+              >
+                {coord && <circle class="pmap__pulse" r={r + 4} />}
+                <circle class="pmap__halo" r={r * 2.6} fill="url(#pmap-glow)" />
+                {mixed ? (
+                  <>
+                    <path class="pmap__dot is-academic" d={`M0 ${-r}A${r} ${r} 0 0 0 0 ${r}Z`} />
+                    <path class="pmap__dot is-industry" d={`M0 ${-r}A${r} ${r} 0 0 1 0 ${r}Z`} />
+                  </>
+                ) : (
+                  <circle
+                    class:list={['pmap__dot', types.includes('academic') ? 'is-academic' : c.members.every((m) => m.role === 'associated') ? 'is-associated' : 'is-industry']}
+                    r={r}
+                  />
+                )}
+                <circle class="pmap__ring" r={r + 1.5} />
+                {c.members.length > 1 && (
+                  <text class="pmap__count" y="4.5">
+                    {c.members.length}
+                  </text>
+                )}
+                <text class="pmap__label" x={left ? -(r + 8) : r + 8} y="6.5" text-anchor={left ? 'end' : 'start'}>
+                  {c.label}
+                </text>
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+      <div class="pmap__tooltip" data-tooltip hidden></div>
+      <div class="pmap__legend" aria-hidden="true">
+        <span><i class="is-academic"></i>University / institute</span>
+        <span><i class="is-industry"></i>Industry</span>
+        <span><i class="is-associated"></i>Associated partner</span>
+        <span><i class="is-arc"></i>DC collaboration</span>
+      </div>
+    </div>
+
+    {
+      !compact && (
+        <aside class="pmap__panel" aria-live="polite">
+          <div data-panel="default">
+            <p class="eyebrow">Beneficiaries & partners</p>
+            <h3 class="pmap__panel-title">
+              {countBeneficiaries} beneficiaries, {countAssociated} associated partners
+            </h3>
+            <p class="muted">
+              Select a location on the map to see who works there and which doctoral projects connect it to the rest of the network. Lines show
+              collaborations between each DC’s academic host and industrial partner.
+            </p>
+            <ul class="pmap__site-list">
+              {clusters.map((c) => (
+                <li>
+                  <button type="button" data-select={c.id}>
+                    <span>{c.label}</span>
+                    <small>{c.members.map((m) => m.short).join(', ')}</small>
+                    <Icon name="arrow-right" size={16} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {clusters.map((c) => (
+            <div data-panel={c.id} hidden>
+              <button type="button" class="pmap__back" data-select="default">
+                <Icon name="arrow-left" size={16} /> All locations
+              </button>
+              <p class="eyebrow eyebrow--plain">
+                <Icon name="pin" size={16} /> {c.label}, {c.members[0].country}
+              </p>
+              {c.members.map((m) => (
+                <article class="pmap__org">
+                  <div class="pmap__org-head">
+                    <PartnerLogo partner={m} />
+                    <div>
+                      <h4>{m.name}</h4>
+                      <p class="chips">
+                        <span class:list={['chip', m.type === 'academic' ? 'chip--green' : 'chip--orange']}>
+                          {m.type === 'academic' ? 'Academic' : 'Industry'}
+                        </span>
+                        <span class="chip">{m.role === 'beneficiary' ? 'Beneficiary' : 'Associated partner'}</span>
+                        {m.coordinator && <span class="chip chip--green">Coordinator</span>}
+                      </p>
+                    </div>
+                  </div>
+                  <p class="pmap__org-about">{m.about}</p>
+                  {(m.hosted.length > 0 || m.partnered.length > 0) && (
+                    <p class="pmap__org-dcs">
+                      {[...m.hosted, ...m.partnered].map((dc) => (
+                        <a class="chip" href={url(dcPath(dc))}>
+                          <strong>{dcLabel(dc.data.number)}</strong> {dc.data.name ?? dc.data.shortTitle}
+                        </a>
+                      ))}
+                    </p>
+                  )}
+                  <a class="link-arrow" href={m.website} target="_blank" rel="noopener">
+                    Visit website <Icon name="external" size={16} />
+                  </a>
+                </article>
+              ))}
+            </div>
+          ))}
+        </aside>
+      )
+    }
+  </div>
+  <script type="application/json" data-sites set:html={JSON.stringify(
+    Object.fromEntries(
+      clusters.map((c) => [
+        c.id,
+        { label: c.label, x: pct(c.x, W), y: pct(c.y, H), members: c.members.map((m) => ({ name: m.name, type: m.role === 'associated' ? 'Associated partner' : m.type === 'academic' ? 'University / institute' : 'Industry' })) },
+      ]),
+    ),
+  )} />
+  {compact && <a class="sr-only" href={url('/consortium/')}>Open the full consortium map</a>}
+</div>
+
+<style>
+  .pmap__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .pmap__filters button {
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .pmap__filters button:hover {
+    color: var(--text);
+    border-color: var(--text-2);
+  }
+  .pmap__filters button.is-active {
+    background: var(--text);
+    color: var(--ink);
+    border-color: var(--text);
+  }
+  .pmap__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .pmap--compact .pmap__layout {
+    grid-template-columns: 1fr;
+  }
+  .pmap__stage {
+    position: relative;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background:
+      radial-gradient(800px 600px at 60% 30%, rgb(95 227 161 / 0.07), transparent 60%),
+      #071611;
+    overflow: hidden;
+  }
+  .pmap__svg {
+    width: 100%;
+    height: auto;
+  }
+  .pmap__graticule {
+    fill: none;
+    stroke: rgb(95 227 161 / 0.07);
+    stroke-width: 1;
+  }
+  .pmap__countries path {
+    fill: #0f2a21;
+    stroke: #1f4537;
+    stroke-width: 0.8;
+    transition: fill 0.3s;
+  }
+  .pmap__countries path.is-member {
+    fill: #17493a;
+    stroke: #3a8a6c;
+    stroke-width: 1.1;
+  }
+  .pmap__country-labels text {
+    fill: rgb(188 209 198 / 0.4);
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: 0.3em;
+    text-anchor: middle;
+  }
+  .pmap__arcs path {
+    fill: none;
+    stroke: url(#pmap-arc);
+    stroke-width: calc(var(--w) * 1px);
+    stroke-linecap: round;
+    opacity: 0.28;
+    stroke-dasharray: 4 6;
+    animation: pmap-dash 30s linear infinite;
+    transition:
+      opacity 0.3s,
+      stroke-width 0.3s;
+  }
+  .pmap__arcs path.is-hot {
+    opacity: 0.95;
+    stroke-dasharray: none;
+    stroke-width: calc(var(--w) * 1.6px);
+  }
+  .pmap.has-focus .pmap__arcs path:not(.is-hot) {
+    opacity: 0.08;
+  }
+  @keyframes pmap-dash {
+    to {
+      stroke-dashoffset: -400;
+    }
+  }
+  .pmap__marker {
+    cursor: pointer;
+    outline: none;
+    transition: opacity 0.3s;
+  }
+  .pmap__marker.is-dim {
+    opacity: 0.18;
+  }
+  .pmap__halo {
+    opacity: 0.45;
+    transition: opacity 0.3s;
+  }
+  .pmap__marker:hover .pmap__halo,
+  .pmap__marker:focus-visible .pmap__halo,
+  .pmap__marker.is-selected .pmap__halo {
+    opacity: 1;
+  }
+  .pmap__dot.is-academic {
+    fill: var(--green);
+  }
+  .pmap__dot.is-industry {
+    fill: var(--orange);
+  }
+  .pmap__dot.is-associated {
+    fill: var(--violet);
+  }
+  .pmap__ring {
+    fill: none;
+    stroke: #071611;
+    stroke-width: 2.5;
+  }
+  .pmap__marker:focus-visible .pmap__ring,
+  .pmap__marker.is-selected .pmap__ring {
+    stroke: #fff;
+  }
+  .pmap__pulse {
+    fill: none;
+    stroke: var(--green);
+    stroke-width: 2;
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: pmap-pulse 2.4s var(--ease) infinite;
+  }
+  @keyframes pmap-pulse {
+    from {
+      transform: scale(1);
+      opacity: 0.9;
+    }
+    to {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+  .pmap__count {
+    fill: var(--ink);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 13px;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+  .pmap__label {
+    fill: var(--text);
+    font-family: var(--font-display);
+    font-stretch: 105%;
+    font-weight: 650;
+    font-size: 19px;
+    paint-order: stroke;
+    stroke: #071611;
+    stroke-width: 4px;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+  .pmap--compact .pmap__label {
+    font-size: 21px;
+  }
+  .pmap__tooltip {
+    position: absolute;
+    z-index: 2;
+    transform: translate(-50%, calc(-100% - 18px));
+    min-width: 200px;
+    max-width: 280px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgb(4 12 9 / 0.94);
+    border: 1px solid var(--line-strong);
+    box-shadow: var(--shadow);
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .pmap__tooltip :global(strong) {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+  }
+  .pmap__tooltip :global(li) {
+    color: var(--text-2);
+  }
+  .pmap__tooltip :global(ul) {
+    margin: 0;
+    padding-left: 1.1em;
+  }
+  .pmap__tooltip :global(small) {
+    color: var(--muted);
+  }
+  .pmap__legend {
+    display: flex;
+    margin: 0 14px 14px;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 0.78rem;
+    color: var(--text-2);
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgb(4 12 9 / 0.7);
+  }
+  .pmap__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pmap__legend i {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .pmap__legend i.is-academic {
+    background: var(--green);
+  }
+  .pmap__legend i.is-industry {
+    background: var(--orange);
+  }
+  .pmap__legend i.is-associated {
+    background: var(--violet);
+  }
+  .pmap__legend i.is-arc {
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--green), var(--orange));
+  }
+  .pmap__panel {
+    position: sticky;
+    top: calc(var(--header-h) + 16px);
+    max-height: calc(100vh - var(--header-h) - 32px);
+    overflow-y: auto;
+    padding: 24px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    background: var(--bg-elev);
+    scrollbar-width: thin;
+  }
+  .pmap__panel-title {
+    font-size: 1.5rem;
+  }
+  .pmap__site-list {
+    list-style: none;
+    margin: 18px 0 0;
+    padding: 0;
+  }
+  .pmap__site-list li + li {
+    border-top: 1px solid var(--line);
+  }
+  .pmap__site-list button {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 12px;
+    text-align: left;
+    padding: 12px 4px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .pmap__site-list button span {
+    font-weight: 650;
+  }
+  .pmap__site-list button small {
+    grid-row: 2;
+    color: var(--muted);
+  }
+  .pmap__site-list button :global(svg) {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    align-self: center;
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+  .pmap__site-list button:hover span {
+    color: var(--green);
+  }
+  .pmap__site-list button:hover :global(svg) {
+    transform: translateX(3px);
+    color: var(--green);
+  }
+  .pmap__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 18px;
+    padding: 6px 12px 6px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: none;
+    color: var(--text-2);
+    cursor: pointer;
+    font-size: 0.85rem;
+  }
+  .pmap__back:hover {
+    color: var(--text);
+  }
+  .pmap__org {
+    padding: 18px 0;
+    border-top: 1px solid var(--line);
+  }
+  .pmap__org-head {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 14px;
+    align-items: center;
+  }
+  .pmap__org-head :global(.logo-plate) {
+    min-height: 56px;
+    padding: 8px;
+  }
+  .pmap__org-head :global(.logo-plate img) {
+    max-height: 38px;
+  }
+  .pmap__org-head :global(.logo-plate--text) {
+    font-size: 0.78rem;
+  }
+  .pmap__org h4 {
+    font-size: 1.08rem;
+    margin-bottom: 8px;
+  }
+  .pmap__org-about {
+    margin: 12px 0;
+    font-size: 0.92rem;
+    color: var(--text-2);
+  }
+  .pmap__org-dcs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .pmap__org-dcs strong {
+    color: var(--orange);
+  }
+  @media (max-width: 960px) {
+    .pmap__layout {
+      grid-template-columns: 1fr;
+    }
+    .pmap__panel {
+      position: static;
+      max-height: none;
+    }
+  }
+  @media (max-width: 560px) {
+    .pmap__label {
+      font-size: 22px;
+    }
+  }
+</style>
+
+<script>
+  type Site = { label: string; x: string; y: string; members: { name: string; type: string }[] };
+  for (const root of document.querySelectorAll<HTMLElement>('[data-pmap]')) {
+    const sites: Record<string, Site> = JSON.parse(root.querySelector('[data-sites]')?.textContent ?? '{}');
+    const tooltip = root.querySelector<HTMLElement>('[data-tooltip]');
+    const markers = [...root.querySelectorAll<SVGGElement>('.pmap__marker')];
+    const arcs = [...root.querySelectorAll<SVGPathElement>('.pmap__arcs path')];
+    const panels = [...root.querySelectorAll<HTMLElement>('[data-panel]')];
+    const compact = root.classList.contains('pmap--compact');
+    let selected: string | null = null;
+
+    const focusArcs = (id: string | null) => {
+      root.classList.toggle('has-focus', !!id);
+      for (const a of arcs) a.classList.toggle('is-hot', !!id && (a.dataset.a === id || a.dataset.b === id));
+    };
+    const showTip = (id: string) => {
+      const s = sites[id];
+      if (!tooltip || !s) return;
+      tooltip.innerHTML = '';
+      const strong = document.createElement('strong');
+      strong.textContent = s.label;
+      const ul = document.createElement('ul');
+      for (const m of s.members) {
+        const li = document.createElement('li');
+        li.textContent = m.name + ' ';
+        const small = document.createElement('small');
+        small.textContent = `· ${m.type}`;
+        li.append(small);
+        ul.append(li);
+      }
+      tooltip.append(strong, ul);
+      tooltip.style.left = s.x;
+      tooltip.style.top = s.y;
+      tooltip.hidden = false;
+    };
+    const hideTip = () => tooltip && (tooltip.hidden = true);
+    const select = (id: string) => {
+      if (compact) {
+        window.location.href = `${root.querySelector<HTMLAnchorElement>('a.sr-only')?.href ?? ''}#${id}`;
+        return;
+      }
+      selected = id === 'default' ? null : id;
+      for (const p of panels) p.hidden = p.dataset.panel !== (selected ?? 'default');
+      for (const m of markers) m.classList.toggle('is-selected', m.dataset.site === selected);
+      focusArcs(selected);
+      if (selected && window.matchMedia('(max-width: 960px)').matches) {
+        root.querySelector('.pmap__panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
+    for (const m of markers) {
+      const id = m.dataset.site!;
+      m.addEventListener('mouseenter', () => {
+        focusArcs(id);
+        showTip(id);
+      });
+      m.addEventListener('mouseleave', () => {
+        focusArcs(selected);
+        hideTip();
+      });
+      m.addEventListener('focus', () => {
+        focusArcs(id);
+        showTip(id);
+      });
+      m.addEventListener('blur', () => {
+        focusArcs(selected);
+        hideTip();
+      });
+      m.addEventListener('click', () => select(id));
+      m.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          select(id);
+        }
+      });
+    }
+    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-select]')) {
+      b.addEventListener('click', () => select(b.dataset.select!));
+    }
+    for (const b of root.querySelectorAll<HTMLButtonElement>('[data-filter]')) {
+      b.addEventListener('click', () => {
+        const f = b.dataset.filter!;
+        for (const other of root.querySelectorAll('[data-filter]')) other.classList.toggle('is-active', other === b);
+        for (const m of markers) {
+          const types = (m.dataset.types ?? '').split(' ');
+          m.classList.toggle('is-dim', f !== 'all' && !types.includes(f));
+        }
+      });
+    }
+    const fromHash = () => {
+      const hash = window.location.hash.slice(1);
+      if (hash && sites[hash] && !compact) select(hash);
+    };
+    fromHash();
+    window.addEventListener('hashchange', fromHash);
+  }
+</script>

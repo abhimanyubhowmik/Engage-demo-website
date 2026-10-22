@@ -1,0 +1,260 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHero from '../../components/PageHero.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import Icon from '../../components/Icon.astro';
+import { getNews, newsPath } from '../../lib/data';
+import { url } from '../../lib/url';
+
+const posts = await getNews();
+const featured = posts.find((p) => p.data.featured) ?? posts[0];
+const rest = posts.filter((p) => p !== featured);
+const categories = [...new Set(posts.map((p) => p.data.category))];
+const events = posts.filter((p) => p.data.category === 'Event');
+const gallery = posts.flatMap((p) => p.data.gallery.map((g) => ({ ...g, post: p }))).slice(0, 6);
+---
+<BaseLayout title="News & Events" description="News, events and stories from the ENGAGE doctoral network.">
+  <PageHero
+    eyebrow="Stories from the network"
+    title="News & Events"
+    lead="Training weeks, research results, secondments and people — follow what happens across the ENGAGE network."
+    image="/images/news/training-archery.webp"
+  />
+
+  <section class="section section--tight" style="padding-top:0">
+    <div class="container">
+      {featured && <NewsCard post={featured} featured />}
+
+      <div class="news-filter" role="group" aria-label="Filter by category" data-news-filter>
+        <button type="button" class="is-active" data-cat="all">All</button>
+        {categories.map((c) => <button type="button" data-cat={c}>{c}</button>)}
+      </div>
+      <ul class="news-list">
+        {
+          [featured, ...rest].filter(Boolean).map((p, i) => (
+            <li data-cat={p!.data.category} class:list={{ 'is-featured-dup': i === 0 }} hidden={i === 0}>
+              <NewsCard post={p!} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--elev">
+    <div class="container events">
+      <div>
+        <p class="eyebrow">Events</p>
+        <h2 class="display h2">Network calendar</h2>
+        <p class="lead">Training events bring doctoral candidates, supervisors and industry together several times during the project.</p>
+      </div>
+      <ol class="timeline">
+        <li class="timeline__item is-upcoming">
+          <span class="timeline__date">Upcoming</span>
+          <div>
+            <h3>Next ENGAGE training event</h3>
+            <p class="muted">Dates and venue will be announced here.</p>
+          </div>
+        </li>
+        {
+          events.map((e) => (
+            <li class="timeline__item">
+              <span class="timeline__date">{e.data.eventDates ?? e.data.date.getFullYear()}</span>
+              <div>
+                <h3>
+                  <a href={url(newsPath(e))}>{e.data.title}</a>
+                </h3>
+                <p class="muted">
+                  <Icon name="pin" size={15} /> {e.data.location}
+                </p>
+              </div>
+            </li>
+          ))
+        }
+        <li class="timeline__item">
+          <span class="timeline__date">October 2025</span>
+          <div>
+            <h3>Project start</h3>
+            <p class="muted">ENGAGE runs from 1 October 2025 to 30 September 2029.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  {
+    gallery.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Gallery</p>
+              <h2 class="display h2">Moments from the network</h2>
+            </div>
+          </div>
+          <ul class="photo-wall">
+            {gallery.map((g) => (
+              <li class:list={{ tall: g.tall }}>
+                <a href={url(newsPath(g.post))}>
+                  <img src={url(g.src)} alt={g.alt} loading="lazy" decoding="async" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .news-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 48px 0 24px;
+  }
+  .news-filter button {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: transparent;
+    color: var(--text-2);
+    cursor: pointer;
+  }
+  .news-filter button.is-active {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .news-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .news-list li[hidden] {
+    display: none;
+  }
+  .events {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: clamp(32px, 5vw, 80px);
+  }
+  .timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 2px solid var(--line-strong);
+  }
+  .timeline__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 20px;
+    padding: 0 0 32px 28px;
+  }
+  .timeline__item::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--bg-elev);
+    border: 2px solid var(--green);
+  }
+  .timeline__item.is-upcoming::before {
+    background: var(--orange);
+    border-color: var(--orange);
+    box-shadow: 0 0 0 6px rgb(247 168 35 / 0.15);
+  }
+  .timeline__date {
+    font-family: var(--font-display);
+    font-stretch: 112%;
+    font-weight: 750;
+    color: var(--green);
+  }
+  .is-upcoming .timeline__date {
+    color: var(--orange);
+  }
+  .timeline h3 {
+    font-size: 1.15rem;
+    margin-bottom: 6px;
+  }
+  .timeline h3 a {
+    text-decoration: none;
+  }
+  .timeline h3 a:hover {
+    color: var(--green);
+  }
+  .timeline p {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+  }
+  .photo-wall {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 220px;
+    gap: 12px;
+  }
+  .photo-wall li:first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .photo-wall li.tall {
+    grid-row: span 2;
+  }
+  .photo-wall a {
+    display: block;
+    height: 100%;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .photo-wall img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s var(--ease);
+  }
+  .photo-wall a:hover img {
+    transform: scale(1.05);
+  }
+  @media (max-width: 900px) {
+    .events {
+      grid-template-columns: 1fr;
+    }
+    .photo-wall {
+      grid-template-columns: repeat(2, 1fr);
+      grid-auto-rows: 180px;
+    }
+  }
+  @media (max-width: 520px) {
+    .timeline__item {
+      grid-template-columns: 1fr;
+      gap: 4px;
+    }
+  }
+</style>
+
+<script>
+  const root = document.querySelector('[data-news-filter]');
+  const items = [...document.querySelectorAll<HTMLElement>('.news-list > li')];
+  for (const b of root?.querySelectorAll<HTMLButtonElement>('button') ?? []) {
+    b.addEventListener('click', () => {
+      for (const o of root!.querySelectorAll('button')) o.classList.toggle('is-active', o === b);
+      const cat = b.dataset.cat;
+      // the featured story is shown above the list, so it only joins the list when a category is picked
+      for (const li of items) li.hidden = cat === 'all' ? li.classList.contains('is-featured-dup') : li.dataset.cat !== cat;
+    });
+  }
+</script>

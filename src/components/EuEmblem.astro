@@ -1,0 +1,25 @@
+---
+// The EU emblem: twelve gold stars on a blue field (proportion 3:2).
+interface Props {
+  width?: number;
+  class?: string;
+}
+const { width = 72, class: cls } = Astro.props;
+const star = (cx: number, cy: number, r: number) => {
+  const pts: string[] = [];
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rr = i % 2 === 0 ? r : r * 0.382;
+    pts.push(`${(cx + rr * Math.cos(a)).toFixed(2)},${(cy + rr * Math.sin(a)).toFixed(2)}`);
+  }
+  return pts.join(' ');
+};
+const stars = Array.from({ length: 12 }, (_, i) => {
+  const a = (i * Math.PI) / 6;
+  return star(45 + 20 * Math.sin(a), 30 - 20 * Math.cos(a), 3.333);
+});
+---
+<svg class={cls} width={width} height={(width * 2) / 3} viewBox="0 0 90 60" role="img" aria-label="Flag of the European Union">
+  <rect width="90" height="60" fill="#003399" />
+  {stars.map((p) => <polygon points={p} fill="#FFCC00" />)}
+</svg>

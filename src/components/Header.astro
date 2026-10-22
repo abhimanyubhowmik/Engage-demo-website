@@ -1,0 +1,210 @@
+---
+import Logo from './Logo.astro';
+import Icon from './Icon.astro';
+import { nav } from '../data/site';
+import { url, stripBase } from '../lib/url';
+
+const path = stripBase(Astro.url.pathname);
+const isActive = (href: string) => path === href || path.startsWith(href);
+---
+<header class="site-header" data-header>
+  <div class="container site-header__inner">
+    <a class="site-header__brand" href={url('/')} aria-label="ENGAGE home">
+      <Logo width={128} />
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={url(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <button class="site-header__toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+      <span class="sr-only">Menu</span>
+      <Icon name="menu" size={24} class="icon-open" />
+      <Icon name="close" size={24} class="icon-close" />
+    </button>
+  </div>
+  <div class="mobile-menu" id="mobile-menu" data-mobile-menu hidden>
+    <nav aria-label="Mobile">
+      <ul>
+        <li><a href={url('/')} aria-current={path === '/' ? 'page' : undefined}>Home</a></li>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={url(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <p class="mobile-menu__foot">MSCA Doctoral Network · 2025–2029</p>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    height: var(--header-h);
+    transition:
+      background-color 0.35s,
+      border-color 0.35s,
+      backdrop-filter 0.35s;
+    border-bottom: 1px solid transparent;
+  }
+  .site-header.is-scrolled,
+  .site-header.is-open {
+    background: rgb(6 18 14 / 0.86);
+    backdrop-filter: blur(14px) saturate(140%);
+    border-bottom-color: var(--line);
+  }
+  /* backdrop-filter would make the header the containing block of the fixed mobile menu */
+  .site-header.is-open {
+    backdrop-filter: none;
+    background: var(--bg);
+  }
+  .site-header__inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .site-header__brand {
+    display: block;
+    flex-shrink: 0;
+  }
+  .site-header__brand :global(img) {
+    width: 118px;
+    height: auto;
+  }
+  .site-nav ul {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .site-nav a {
+    display: block;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-family: var(--font-display);
+    font-stretch: 106%;
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text-2);
+    text-decoration: none;
+    transition:
+      color 0.2s,
+      background-color 0.2s;
+  }
+  .site-nav a:hover {
+    color: var(--text);
+    background: rgb(255 255 255 / 0.06);
+  }
+  .site-nav a[aria-current='page'] {
+    color: var(--ink);
+    background: var(--green);
+  }
+  .site-header__toggle {
+    display: none;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid var(--line-strong);
+    background: rgb(255 255 255 / 0.04);
+    place-items: center;
+    cursor: pointer;
+  }
+  .site-header__toggle :global(.icon-close) {
+    display: none;
+  }
+  .site-header.is-open :global(.icon-close) {
+    display: block;
+  }
+  .site-header.is-open :global(.icon-open) {
+    display: none;
+  }
+  .mobile-menu {
+    position: fixed;
+    inset: var(--header-h) 0 0;
+    background: var(--bg);
+    padding: 24px var(--gutter) 40px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .mobile-menu[hidden] {
+    display: none;
+  }
+  .mobile-menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .mobile-menu li + li {
+    border-top: 1px solid var(--line);
+  }
+  .mobile-menu a {
+    display: block;
+    padding: 18px 0;
+    font-family: var(--font-display);
+    font-stretch: 116%;
+    font-weight: 800;
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .mobile-menu a[aria-current='page'] {
+    color: var(--green);
+  }
+  .mobile-menu__foot {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 32px;
+  }
+  @media (max-width: 1080px) {
+    .site-nav {
+      display: none;
+    }
+    .site-header__toggle {
+      display: grid;
+    }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+  const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');
+  if (header) {
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 12);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+  }
+  if (header && toggle && menu) {
+    const setOpen = (open: boolean) => {
+      header.classList.toggle('is-open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+      menu.hidden = !open;
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+    };
+    toggle.addEventListener('click', () => setOpen(menu.hidden));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !menu.hidden) setOpen(false);
+    });
+    window.matchMedia('(min-width: 1081px)').addEventListener('change', (e) => e.matches && setOpen(false));
+  }
+</script>

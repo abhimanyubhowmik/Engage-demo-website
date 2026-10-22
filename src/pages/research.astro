@@ -1,0 +1,387 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import { themes, type ThemeId } from '../data/site';
+import { getDcs, dcPath } from '../lib/data';
+import { url, dcLabel } from '../lib/url';
+
+const dcs = await getDcs();
+const objectives: {
+  theme: ThemeId;
+  aim: string;
+  intro?: string;
+  points: string[];
+  outro?: string;
+  figures?: { value: string; label: string }[];
+}[] = [
+  {
+    theme: 'perception',
+    aim: 'To estimate and track the state of the machine and its surrounding dynamic environment in real time using a multimodal sensing system, enabling autonomous navigation in worksites (forest, construction, terminal) and updating as-built construction information models.',
+    intro: 'We will',
+    points: [
+      'develop algorithms that enable real-time perception capabilities to determine the precise location of the machine as well as the 3D geometry and semantics (the meaning of data, such as object types) in the worksite;',
+      'create methods to continuously update the existing 3D representation of the worksite as it changes over time — as objects move or the landscape is modified;',
+      'develop techniques to represent and group the contents of the 3D models in ways that support downstream tasks such as automated planning, situational awareness and autonomous operations.',
+    ],
+  },
+  {
+    theme: 'control',
+    aim: 'To enhance the adaptability and precision of machine-learning-based control algorithms for intelligent mobile machinery — in particular excavators and excavation tasks — reducing deployment costs and expanding application versatility in complex dynamic environments.',
+    intro: 'This objective develops novel learning algorithms that',
+    points: [
+      'leverage large, low-quality yet inexpensive offline datasets to train high-performing controllers, decreasing the cost of data collection by at least 50%;',
+      'enable human operators to intuitively fine-tune controllers with minimal input, aiming to improve success rates to 95%;',
+      'facilitate rapid policy transfer to new tasks and robotic configurations, minimising retraining and increasing operational robustness.',
+    ],
+    outro: 'The approach is intended to set a new benchmark in data-efficient control, mastering complex control challenges with actively curated, limited datasets and inexpensive offline knowledge.',
+    figures: [
+      { value: '≥50%', label: 'lower data-collection cost' },
+      { value: '95%', label: 'target success rate' },
+    ],
+  },
+  {
+    theme: 'safety',
+    aim: 'To develop methods for mitigating unsafe motions and ways of certifying the safety of autonomous functionalities of mobile working machines, bringing the new functionalities offered by AI into practice in construction and agriculture.',
+    intro: 'We will push the state of the art in how AI-based autonomous functionalities can be employed, validated and safety-certified. We will',
+    points: [
+      'develop certifiable safety controllers for learned traversability maps in a construction site, scalable to high-dimensional dynamic models of wheeled machines moving on uneven terrain;',
+      'design AI-integrated control systems that adhere to safety standards for autonomous agricultural vehicles, and contribute to future machinery standards.',
+    ],
+  },
+  {
+    theme: 'simulation',
+    aim: 'To develop simulation-based solutions for automated testing, training and optimisation of autonomous capabilities in construction and forestry applications.',
+    intro:
+      'Our goal is scalable use of simulators of mobile working machines that realistically capture the interaction with the environment — contact forces and soil deformation. We will develop methods for',
+    points: [
+      'automated generation of simulation scenarios, state estimation and parameter identification from real-world data;',
+      'pre-training of AI models that predict detailed contact response, and domain adaptation to real applications;',
+      'extracting actionable information from the simulator.',
+    ],
+    outro: 'Together, the methods support both learning from and directly acting on the created synthetic data.',
+  },
+];
+
+const training = [
+  { icon: 'users', title: 'Joint supervision', text: 'Every project is co-supervised by an academic host and an industrial partner, combining scientific depth with real machines and real worksites.' },
+  { icon: 'factory', title: 'Industrial Doctorates', text: 'Doctoral candidates spend substantial time in industry, working on the problems that machine manufacturers and technology suppliers face today.' },
+  { icon: 'calendar', title: 'Network-wide training', text: 'Training weeks bring the network together for scientific sessions, open science, responsible AI, dissemination training and site visits.' },
+  { icon: 'sparkle', title: 'Career development', text: 'Transferable skills, international collaboration and a strong professional network for careers during and beyond the doctorate.' },
+] as const;
+---
+<BaseLayout
+  title="Research"
+  description="ENGAGE research objectives: perception and 3D mapping, learning-based control, safe autonomy, and simulation intelligence for mobile working machines."
+>
+  <PageHero
+    eyebrow="Research objectives"
+    title="Research"
+    lead="The overarching aim of ENGAGE is to develop new methods, processes and algorithms — specifically using robotisation and AI — and to provide proof-of-concept for representative cases that increase the sustainability, productivity and safety of mobile working machine industries."
+    image="/images/photos/forest-canopy.webp"
+  >
+    <nav class="obj-nav" aria-label="Objectives">
+      {
+        objectives.map((o) => (
+          <a href={`#objective-${themes[o.theme].objective}`}>
+            <strong>0{themes[o.theme].objective}</strong>
+            {themes[o.theme].label}
+          </a>
+        ))
+      }
+    </nav>
+  </PageHero>
+
+  {
+    objectives.map((o, i) => {
+      const t = themes[o.theme];
+      const list = dcs.filter((d) => d.data.theme === o.theme);
+      return (
+        <section class:list={['section objective', { 'section--elev': i % 2 === 1 }]} id={`objective-${t.objective}`}>
+          <div class:list={['container objective__grid', { 'is-flipped': i % 2 === 1 }]}>
+            <div class="objective__media" data-reveal>
+              <img src={url(t.image)} alt="" loading="lazy" decoding="async" />
+              <span class="objective__num">0{t.objective}</span>
+            </div>
+            <div class="objective__text" data-reveal style="--reveal-delay:100ms">
+              <p class="eyebrow">Objective 0{t.objective}</p>
+              <h2 class="display h2">{t.label}</h2>
+              <p class="lead">{o.aim}</p>
+              {o.intro && <p class="objective__intro">{o.intro}</p>}
+              <ul class="objective__points">
+                {o.points.map((p) => (
+                  <li>{p}</li>
+                ))}
+              </ul>
+              {o.outro && <p class="muted">{o.outro}</p>}
+              {o.figures && (
+                <div class="objective__figures">
+                  {o.figures.map((f) => (
+                    <div>
+                      <strong>{f.value}</strong>
+                      <span>{f.label}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p class="objective__dc-title">Doctoral projects</p>
+              <ul class="objective__dcs">
+                {list.map((dc) => (
+                  <li>
+                    <a href={url(dcPath(dc))}>
+                      <span class="badge-dc">{dcLabel(dc.data.number)}</span>
+                      <span>
+                        {dc.data.shortTitle}
+                        {dc.data.name && <small>{dc.data.name}</small>}
+                      </span>
+                      <Icon name="arrow-right" size={16} />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+      );
+    })
+  }
+
+  <section class="section section--paper">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Training</p>
+          <h2 class="display h2">How ENGAGE trains future engineers</h2>
+          <p class="lead">
+            Engineers who understand robotics and AI, machinery, the domains where machines work, and the big trends of digitalisation,
+            sustainability and responsible AI.
+          </p>
+        </div>
+      </div>
+      <div class="training">
+        {
+          training.map((t, i) => (
+            <article class="training__item" data-reveal style={`--reveal-delay:${i * 80}ms`}>
+              <span class="training__icon">
+                <Icon name={t.icon} size={26} />
+              </span>
+              <h3>{t.title}</h3>
+              <p>{t.text}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .obj-nav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 40px;
+  }
+  .obj-nav a {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line-strong);
+    background: rgb(6 18 14 / 0.6);
+    backdrop-filter: blur(6px);
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1.25;
+    transition: border-color 0.2s, transform 0.25s var(--ease);
+  }
+  .obj-nav a:hover {
+    border-color: var(--green);
+    transform: translateY(-3px);
+  }
+  .obj-nav strong {
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-size: 1.6rem;
+    color: var(--green);
+    line-height: 1;
+  }
+  .objective__grid {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+  .objective__grid.is-flipped .objective__media {
+    order: 2;
+  }
+  .objective__media {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    aspect-ratio: 16 / 11;
+  }
+  .objective__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .objective__num {
+    position: absolute;
+    left: 20px;
+    bottom: 12px;
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-weight: 850;
+    font-size: clamp(4rem, 8vw, 7rem);
+    line-height: 1;
+    color: rgb(255 255 255 / 0.9);
+  }
+  .objective__intro {
+    margin-top: 24px;
+    font-weight: 600;
+  }
+  .objective__points {
+    list-style: none;
+    margin: 0 0 20px;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+  .objective__points li {
+    position: relative;
+    padding-left: 28px;
+    color: var(--text-2);
+  }
+  .objective__points li::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0.6em;
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--green);
+    transform: rotate(45deg);
+  }
+  .objective__figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 8px 0 20px;
+  }
+  .objective__figures div {
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+  }
+  .objective__figures strong {
+    display: block;
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-size: 2.2rem;
+    line-height: 1;
+    color: var(--orange);
+  }
+  .objective__figures span {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .objective__dc-title {
+    margin: 28px 0 8px;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .objective__dcs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .objective__dcs li {
+    border-bottom: 1px solid var(--line);
+  }
+  .objective__dcs a {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 2px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .objective__dcs small {
+    display: block;
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .objective__dcs a :global(svg) {
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+  .objective__dcs a:hover {
+    color: var(--green);
+  }
+  .objective__dcs a:hover :global(svg) {
+    transform: translateX(3px);
+    color: var(--green);
+  }
+  .training {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+  .training__item {
+    padding: 26px;
+    border-radius: var(--radius);
+    background: #fff;
+    border: 1px solid var(--paper-2);
+  }
+  .training__icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: var(--ink);
+    color: var(--green);
+    margin-bottom: 18px;
+  }
+  .training__item h3 {
+    font-size: 1.2rem;
+  }
+  .training__item p {
+    color: var(--ink-2);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+  @media (max-width: 1000px) {
+    .obj-nav,
+    .training {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .objective__grid {
+      grid-template-columns: 1fr;
+    }
+    .objective__grid.is-flipped .objective__media {
+      order: 0;
+    }
+    .objective__media {
+      position: relative;
+      top: 0;
+    }
+  }
+  @media (max-width: 560px) {
+    .obj-nav,
+    .training {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

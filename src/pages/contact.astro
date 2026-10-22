@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Avatar from '../components/Avatar.astro';
+import Icon from '../components/Icon.astro';
+import { site } from '../data/site';
+import { supervisorById } from '../data/supervisors';
+import { url } from '../lib/url';
+
+const topics = [
+  { icon: 'factory', title: 'Industry & collaboration', text: 'Interested in the research, joining an event or collaborating with the network? Contact the coordinator.' },
+  { icon: 'users', title: 'Doctoral positions', text: 'All 13 doctoral positions have been filled. Future opportunities will be announced on this website.', href: '/recruitment/', cta: 'Recruitment status' },
+  { icon: 'calendar', title: 'Events & media', text: 'For training events, dissemination and media enquiries, contact the project manager.' },
+] as const;
+---
+<BaseLayout title="Contact" description="Contact the ENGAGE coordinator and project manager at Tampere University.">
+  <PageHero
+    eyebrow="Get in touch"
+    title="Contact"
+    lead="ENGAGE is coordinated by Tampere University, Finland. We are happy to hear from researchers, companies, students and media."
+    image="/images/photos/forest-machine.webp"
+  />
+  <section class="section section--tight" style="padding-top:0">
+    <div class="container contact-grid">
+      {
+        site.contacts.map((c) => {
+          const sup = c.supervisorId ? supervisorById[c.supervisorId] : undefined;
+          return (
+            <article class="contact-card card">
+              <div class="contact-card__avatar">
+                <Avatar name={c.name.replace('Prof. ', '')} photo={sup?.photo} />
+              </div>
+              <div>
+                <p class="eyebrow eyebrow--plain">{c.role}</p>
+                <h2>{c.name}</h2>
+                <p class="muted">{c.org}</p>
+                <div class="contact-card__actions">
+                  <a class="btn" href={`mailto:${c.email}`}>
+                    <Icon name="mail" /> {c.email}
+                  </a>
+                  {sup && (
+                    <a class="btn btn--ghost" href={url(`/supervisors/#${sup.id}`)}>
+                      Profile
+                    </a>
+                  )}
+                </div>
+              </div>
+            </article>
+          );
+        })
+      }
+    </div>
+  </section>
+  <section class="section section--paper section--tight">
+    <div class="container topics">
+      {
+        topics.map((t) => (
+          <article class="topic">
+            <span class="topic__icon">
+              <Icon name={t.icon} size={24} />
+            </span>
+            <h3>{t.title}</h3>
+            <p>{t.text}</p>
+            {'href' in t && (
+              <a class="link-arrow" href={url(t.href)}>
+                {t.cta} <Icon name="arrow-right" />
+              </a>
+            )}
+          </article>
+        ))
+      }
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  .contact-card {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 24px;
+    align-items: center;
+    padding: 28px;
+  }
+  .contact-card__avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 28px;
+    overflow: hidden;
+    font-size: 2rem;
+    border: 1px solid var(--line-strong);
+  }
+  .contact-card__avatar :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .contact-card h2 {
+    font-size: 1.6rem;
+    margin-bottom: 4px;
+  }
+  .contact-card .muted {
+    margin: 0;
+  }
+  .contact-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .contact-card__actions .btn {
+    font-family: var(--font-body);
+    font-stretch: 100%;
+    font-weight: 600;
+    word-break: break-all;
+  }
+  .topics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .topic {
+    padding: 26px;
+    border-radius: var(--radius);
+    background: #fff;
+    border: 1px solid var(--paper-2);
+  }
+  .topic__icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: var(--ink);
+    color: var(--orange);
+    margin-bottom: 16px;
+  }
+  .topic h3 {
+    font-size: 1.2rem;
+  }
+  .topic p {
+    color: var(--ink-2);
+  }
+  .topic .link-arrow {
+    color: var(--green-deep);
+  }
+  @media (max-width: 900px) {
+    .contact-grid,
+    .topics {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 480px) {
+    .contact-card {
+      grid-template-columns: 1fr;
+      padding: 22px;
+    }
+  }
+</style>

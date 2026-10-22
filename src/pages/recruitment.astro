@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Icon from '../components/Icon.astro';
+import { themes } from '../data/site';
+import { getDcs, dcPath, partnerById } from '../lib/data';
+import { url, dcLabel } from '../lib/url';
+
+const dcs = await getDcs();
+---
+<BaseLayout title="Recruitment" description="The 13 ENGAGE doctoral candidate positions and their status.">
+  <PageHero
+    eyebrow="Doctoral positions"
+    title="Recruitment"
+    lead={`The MSCA Doctoral Network ENGAGE has ${dcs.length} positions for doctoral candidates (DCs). All positions have been filled — future opportunities will be announced here.`}
+  />
+  <section class="section section--tight" style="padding-top:0">
+    <div class="container">
+      <ol class="positions">
+        {
+          dcs.map((dc) => (
+            <li>
+              <a href={url(dcPath(dc))}>
+                <span class="badge-dc">{dcLabel(dc.data.number)}</span>
+                <span class="positions__title">
+                  {dc.data.title}
+                  <small>
+                    {themes[dc.data.theme].label}
+                    {dc.data.host.length > 0 && ` · ${dc.data.host.map((h) => partnerById[h]?.short).join(', ')}`}
+                  </small>
+                </span>
+                <span class="positions__status">
+                  <Icon name="shield" size={16} /> Position filled
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .positions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .positions li {
+    border-bottom: 1px solid var(--line);
+  }
+  .positions a {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 18px 4px;
+    text-decoration: none;
+  }
+  .positions a:hover .positions__title {
+    color: var(--green);
+  }
+  .positions__title {
+    font-weight: 600;
+    font-size: 1.05rem;
+  }
+  .positions__title small {
+    display: block;
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .positions__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid rgb(95 227 161 / 0.4);
+    color: var(--green);
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+  @media (max-width: 640px) {
+    .positions a {
+      grid-template-columns: auto 1fr;
+    }
+    .positions__status {
+      grid-column: 2;
+      justify-self: start;
+    }
+  }
+</style>

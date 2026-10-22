@@ -1,0 +1,138 @@
+---
+import Icon from './Icon.astro';
+import { formatDate, newsPath, type NewsPost } from '../lib/data';
+import { url } from '../lib/url';
+interface Props {
+  post: NewsPost;
+  featured?: boolean;
+}
+const { post, featured = false } = Astro.props;
+const d = post.data;
+---
+<article class:list={['news-card card card--hover', { 'news-card--featured': featured }]} data-news-card data-category={d.category}>
+  <div class="news-card__media">
+    <img src={url(d.cover)} alt={d.coverAlt} loading={featured ? 'eager' : 'lazy'} decoding="async" />
+    <span class="news-card__cat">{d.category}</span>
+  </div>
+  <div class="news-card__body">
+    <p class="news-card__meta">
+      <Icon name="calendar" size={15} />
+      <time datetime={d.date.toISOString()}>{d.eventDates ?? formatDate(d.date)}</time>
+      {d.location && (
+        <span>
+          <Icon name="pin" size={15} /> {d.location}
+        </span>
+      )}
+    </p>
+    <h3 class="news-card__title">
+      <a class="card__link" href={url(newsPath(post))}>{d.title}</a>
+    </h3>
+    <p class="news-card__excerpt">{d.excerpt}</p>
+    <span class="link-arrow news-card__more">Read story <Icon name="arrow-right" /></span>
+  </div>
+</article>
+
+<style>
+  .news-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .news-card__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+  .news-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.9s var(--ease);
+  }
+  .news-card:hover .news-card__media img {
+    transform: scale(1.05);
+  }
+  .news-card__cat {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: var(--green);
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-stretch: 110%;
+    font-weight: 750;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .news-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 22px 22px 24px;
+    flex: 1;
+  }
+  .news-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--muted);
+  }
+  .news-card__meta span,
+  .news-card__meta :global(svg) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .news-card__title {
+    margin: 0;
+    font-size: 1.3rem;
+    line-height: 1.22;
+  }
+  .news-card__excerpt {
+    margin: 0;
+    color: var(--text-2);
+    font-size: 0.95rem;
+  }
+  .news-card__more {
+    margin-top: auto;
+    padding-top: 8px;
+    font-size: 0.92rem;
+  }
+  .news-card--featured {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+  }
+  .news-card--featured .news-card__media {
+    aspect-ratio: auto;
+    min-height: 420px;
+  }
+  .news-card--featured .news-card__body {
+    padding: clamp(24px, 3.5vw, 48px);
+    justify-content: center;
+  }
+  .news-card--featured .news-card__title {
+    font-size: clamp(1.6rem, 2.6vw, 2.3rem);
+  }
+  .news-card--featured .news-card__excerpt {
+    font-size: 1.05rem;
+  }
+  .news-card--featured .news-card__more {
+    margin-top: 12px;
+  }
+  @media (max-width: 860px) {
+    .news-card--featured {
+      grid-template-columns: 1fr;
+    }
+    .news-card--featured .news-card__media {
+      min-height: 0;
+      aspect-ratio: 16 / 10;
+    }
+  }
+</style>

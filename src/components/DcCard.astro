@@ -1,0 +1,173 @@
+---
+import Avatar from './Avatar.astro';
+import { themes } from '../data/site';
+import { partnerById } from '../data/partners';
+import { dcPath, dcCountry, type DC } from '../lib/data';
+import { url, dcLabel } from '../lib/url';
+interface Props {
+  dc: DC;
+  compact?: boolean;
+}
+const { dc, compact = false } = Astro.props;
+const d = dc.data;
+const host = d.host.map((h) => partnerById[h]?.short).filter(Boolean).join(' · ');
+const partner = d.partners.map((p) => partnerById[p]?.name).filter(Boolean).join(' · ');
+const searchText = [d.name, d.title, d.shortTitle, host, partner, ...d.keywords].join(' ').toLowerCase();
+---
+<article
+  class:list={['dc-card card card--hover', { 'dc-card--compact': compact, 'dc-card--pending': d.status === 'profile-pending' }]}
+  data-dc-card
+  data-theme={d.theme}
+  data-industries={d.industries.join(' ')}
+  data-country={dcCountry(dc) ?? ''}
+  data-search={searchText}
+>
+  <div class="dc-card__media">
+    {
+      d.photo ? (
+        <Avatar name={d.name ?? ''} photo={d.photo} class="dc-card__img" />
+      ) : (
+        <span class="dc-card__placeholder" aria-hidden="true">
+          <span>{dcLabel(d.number)}</span>
+          <small>{d.name ? 'Photo coming soon' : 'Profile coming soon'}</small>
+        </span>
+      )
+    }
+    <span class="badge-dc dc-card__badge">{dcLabel(d.number)}</span>
+    <span class="dc-card__theme">{themes[d.theme].short}</span>
+  </div>
+  <div class="dc-card__body">
+    <p class="dc-card__name">{d.name ?? 'Doctoral candidate'}</p>
+    <h3 class="dc-card__title">
+      <a class="card__link" href={url(dcPath(dc))}>{d.shortTitle}</a>
+    </h3>
+    {!compact && <p class="dc-card__summary">{d.summary}</p>}
+    {(host || partner) && (
+      <p class="dc-card__meta">
+        {host && <span>{host}</span>}
+        {partner && <span class="dc-card__partner">{partner}</span>}
+      </p>
+    )}
+  </div>
+</article>
+
+<style>
+  .dc-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .dc-card__media {
+    position: relative;
+    aspect-ratio: 4 / 4.4;
+    overflow: hidden;
+    background: var(--surface-2);
+  }
+  .dc-card--compact .dc-card__media {
+    aspect-ratio: 4 / 4.6;
+  }
+  .dc-card__media :global(.dc-card__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 20%;
+    transition: transform 0.8s var(--ease);
+    filter: saturate(0.92);
+  }
+  .dc-card:hover .dc-card__media :global(.dc-card__img) {
+    transform: scale(1.045);
+  }
+  .dc-card__media::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 45%;
+    background: linear-gradient(180deg, transparent, rgb(6 18 14 / 0.75));
+    pointer-events: none;
+  }
+  .dc-card__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    gap: 6px;
+    background:
+      radial-gradient(circle at 25% 20%, rgb(95 227 161 / 0.22), transparent 55%),
+      radial-gradient(circle at 80% 85%, rgb(247 168 35 / 0.2), transparent 55%),
+      repeating-linear-gradient(0deg, rgb(255 255 255 / 0.03) 0 1px, transparent 1px 14px),
+      var(--surface-2);
+  }
+  .dc-card__placeholder span {
+    font-family: var(--font-display);
+    font-stretch: 125%;
+    font-weight: 850;
+    font-size: clamp(2.6rem, 5vw, 3.6rem);
+    color: rgb(255 255 255 / 0.85);
+    letter-spacing: 0.02em;
+  }
+  .dc-card__placeholder small {
+    color: var(--muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+  }
+  .dc-card__badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 1;
+  }
+  .dc-card__theme {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    z-index: 1;
+    font-size: 0.72rem;
+    font-family: var(--font-display);
+    font-stretch: 110%;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+  .dc-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px 20px 22px;
+    flex: 1;
+  }
+  .dc-card__name {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-2);
+    font-size: 0.95rem;
+  }
+  .dc-card__title {
+    margin: 0;
+    font-size: 1.18rem;
+    line-height: 1.2;
+  }
+  .dc-card__title a:hover {
+    color: var(--green);
+  }
+  .dc-card__summary {
+    margin: 4px 0 0;
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .dc-card__meta {
+    margin: auto 0 0;
+    padding-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+  .dc-card__partner {
+    color: var(--orange);
+  }
+</style>
