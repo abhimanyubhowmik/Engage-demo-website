@@ -189,7 +189,7 @@ const training = [
     padding: 16px 18px;
     border-radius: 14px;
     border: 1px solid var(--line-strong);
-    background: rgb(6 18 14 / 0.6);
+    background: rgb(var(--bg-rgb) / 0.6);
     backdrop-filter: blur(6px);
     text-decoration: none;
     font-weight: 600;
@@ -197,14 +197,14 @@ const training = [
     transition: border-color 0.2s, transform 0.25s var(--ease);
   }
   .obj-nav a:hover {
-    border-color: var(--green);
+    border-color: var(--accent);
     transform: translateY(-3px);
   }
   .obj-nav strong {
     font-family: var(--font-display);
     font-stretch: 125%;
     font-size: 1.6rem;
-    color: var(--green);
+    color: var(--accent);
     line-height: 1;
   }
   .objective__grid {
@@ -264,7 +264,7 @@ const training = [
     width: 10px;
     height: 10px;
     border-radius: 3px;
-    background: var(--green);
+    background: var(--accent);
     transform: rotate(45deg);
   }
   .objective__figures {
@@ -327,11 +327,11 @@ const training = [
     transition: transform 0.2s;
   }
   .objective__dcs a:hover {
-    color: var(--green);
+    color: var(--accent);
   }
   .objective__dcs a:hover :global(svg) {
     transform: translateX(3px);
-    color: var(--green);
+    color: var(--accent);
   }
   .training {
     display: grid;
@@ -351,7 +351,7 @@ const training = [
     height: 56px;
     border-radius: 16px;
     background: var(--ink);
-    color: var(--green);
+    color: var(--accent);
     margin-bottom: 18px;
   }
   .training__item h3 {

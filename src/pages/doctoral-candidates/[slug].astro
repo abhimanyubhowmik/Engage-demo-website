@@ -31,7 +31,7 @@ const industryPartners = d.partners.map((id) => partnerById[id]).filter(Boolean)
 const team = d.supervisors.map((id) => supervisorById[id]).filter(Boolean);
 const paragraphs = (text?: string) => (text ?? '').split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 const related = all.filter((o) => o.id !== dc.id && o.data.theme === d.theme).slice(0, 3);
-const cover = d.cover ?? theme.image;
+const cover = d.cover ?? (d.industries[0] ? industries[d.industries[0]].image : theme.image);
 const label = dcLabel(d.number);
 const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}`;
 ---
@@ -328,7 +328,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     inset: 0;
     z-index: -1;
     background:
-      linear-gradient(90deg, rgb(6 18 14 / 0.96) 0%, rgb(6 18 14 / 0.82) 50%, rgb(6 18 14 / 0.5) 100%),
+      linear-gradient(90deg, rgb(var(--bg-rgb) / 0.96) 0%, rgb(var(--bg-rgb) / 0.82) 50%, rgb(var(--bg-rgb) / 0.5) 100%),
       linear-gradient(180deg, transparent 60%, var(--bg) 100%);
   }
   .dc-hero__grid {
@@ -355,7 +355,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     font-size: 0.8rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--green);
+    color: var(--accent);
     text-decoration: none;
   }
   .dc-hero__title {
@@ -387,13 +387,13 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     gap: 8px;
     padding: 8px 14px;
     border-radius: 999px;
-    border: 1px solid rgb(95 227 161 / 0.4);
-    background: rgb(6 18 14 / 0.6);
+    border: 1px solid rgb(var(--accent-rgb) / 0.4);
+    background: rgb(var(--bg-rgb) / 0.6);
     font-size: 0.92rem;
     color: var(--text);
   }
   .dc-hero__org :global(svg) {
-    color: var(--green);
+    color: var(--accent);
   }
   .dc-hero__org.is-industry {
     border-color: rgb(247 168 35 / 0.45);
@@ -428,7 +428,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     text-align: center;
     gap: 8px;
     background:
-      radial-gradient(circle at 25% 20%, rgb(95 227 161 / 0.25), transparent 55%),
+      radial-gradient(circle at 25% 20%, rgb(var(--accent-rgb) / 0.25), transparent 55%),
       radial-gradient(circle at 80% 85%, rgb(247 168 35 / 0.22), transparent 55%),
       var(--surface-2);
   }
@@ -445,7 +445,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     position: absolute;
     width: 34px;
     height: 34px;
-    border: 3px solid var(--green);
+    border: 3px solid var(--accent);
   }
   .viewfinder__corner.tl {
     top: 0;
@@ -485,7 +485,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     font-size: 0.72rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--green);
+    color: var(--accent);
   }
   .viewfinder__tag span:last-child {
     color: var(--muted);
@@ -501,7 +501,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     margin: 0 0 40px;
     padding: 28px 30px;
     border-radius: var(--radius);
-    background: linear-gradient(135deg, rgb(95 227 161 / 0.12), rgb(247 168 35 / 0.08));
+    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.12), rgb(247 168 35 / 0.08));
     border: 1px solid var(--line-strong);
   }
   .dc-question :global(svg) {
@@ -596,7 +596,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     font-size: 0.82rem;
   }
   .team a:hover strong {
-    color: var(--green);
+    color: var(--accent);
   }
   .org {
     display: grid;
@@ -628,7 +628,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     font-size: 0.82rem;
   }
   .org:hover span {
-    color: var(--green);
+    color: var(--accent);
   }
   .objective {
     display: flex;
@@ -641,11 +641,11 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     font-family: var(--font-display);
     font-stretch: 125%;
     font-size: 1.8rem;
-    color: var(--green);
+    color: var(--accent);
     line-height: 1;
   }
   .objective:hover span {
-    color: var(--green);
+    color: var(--accent);
   }
   .side-links {
     display: grid;
@@ -659,7 +659,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     color: var(--text-2);
   }
   .side-links a:hover {
-    color: var(--green);
+    color: var(--accent);
   }
   .related {
     list-style: none;
@@ -697,7 +697,7 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     text-align: right;
   }
   .pager__link:hover {
-    color: var(--green);
+    color: var(--accent);
   }
   .pager__all {
     padding: 10px 18px;
@@ -707,8 +707,8 @@ const pageTitle = d.name ? `${d.name} — ${label}` : `${label}: ${d.shortTitle}
     font-size: 0.9rem;
   }
   .pager__all:hover {
-    border-color: var(--green);
-    color: var(--green);
+    border-color: var(--accent);
+    color: var(--accent);
   }
   @media (max-width: 960px) {
     .dc-hero__grid,

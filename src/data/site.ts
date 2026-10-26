@@ -4,7 +4,7 @@ export const site = {
   fullTitle:
     "Educating Europe's Future Engineers for the Next Generation of Mobile Working Machines: AI driven Sustainability, Productivity, and Safety",
   description:
-    'ENGAGE is a Marie Skłodowska-Curie Doctoral Network training 13 doctoral candidates in AI, robotics and mechanics for the next generation of mobile working machines in mining, construction, harbours, forestry and farming.',
+    'ENGAGE is a Marie Skłodowska-Curie Doctoral Network training 13 doctoral candidates in AI, robotics and mechanics for the next generation of mobile working machines in construction, mining, forestry, agriculture and logistics.',
   grantNumber: '101226234',
   call: 'HORIZON-MSCA-2024-DN',
   start: '2025-10-01',
@@ -40,7 +40,7 @@ export const nav = [
 ];
 
 export type ThemeId = 'perception' | 'control' | 'safety' | 'simulation';
-export type IndustryId = 'construction' | 'mining' | 'forestry' | 'agriculture' | 'logistics';
+export type IndustryId = 'construction' | 'forestry' | 'agriculture' | 'logistics';
 
 /** The four ENGAGE research objectives, used to group DC projects. */
 export const themes: Record<
@@ -81,30 +81,43 @@ export const themes: Record<
   },
 };
 
-export const industries: Record<IndustryId, { label: string; blurb: string; image: string }> = {
-  construction: {
-    label: 'Construction',
-    blurb: 'Excavators and earth-movers that perceive the worksite, dig with learned control and keep as-built models up to date.',
-    image: '/images/generated/construction-site.webp',
-  },
-  mining: {
-    label: 'Mining & quarries',
-    blurb: 'Persistent 4D maps and safe navigation for haulage and loading in changing, unstructured mining environments.',
-    image: '/images/generated/mining-pit.webp',
-  },
+/**
+ * Industries where ENGAGE machines work. `words` are the headline words shown in the home hero while
+ * this industry's background is on screen (construction and mining share one image).
+ */
+export const industries: Record<
+  IndustryId,
+  { label: string; blurb: string; image: string; imageSm: string; words: string[] }
+> = {
   forestry: {
     label: 'Forestry',
     blurb: 'Positioning and traversability for forest machines working among trees, soft soil and changing seasons.',
-    image: '/images/photos/forest-machine.webp',
+    image: '/images/photos/hero-forestry.webp',
+    imageSm: '/images/photos/hero-forestry-sm.webp',
+    words: ['forestry.'],
+  },
+  construction: {
+    label: 'Construction & mining',
+    blurb:
+      'Excavators, earth-movers and haulers that perceive the worksite, dig with learned control, keep as-built models up to date and navigate changing mine sites.',
+    image: '/images/photos/hero-construction.webp',
+    imageSm: '/images/photos/hero-construction-sm.webp',
+    words: ['construction.', 'mining.'],
   },
   agriculture: {
     label: 'Agriculture',
     blurb: 'Certified-safe geofencing and autonomy for tractors and field robots that maximise usable field coverage.',
-    image: '/images/generated/agriculture-field.webp',
+    image: '/images/photos/hero-agriculture.webp',
+    imageSm: '/images/photos/hero-agriculture-sm.webp',
+    words: ['agriculture.'],
   },
   logistics: {
-    label: 'Harbours & logistics',
-    blurb: 'Terminal and hub automation where heavy machines share space with people and other vehicles.',
-    image: '/images/generated/harbour-terminal.webp',
+    label: 'Logistics',
+    blurb: 'Autonomous material handling and transport in logistics hubs, where heavy machines share space with people and other vehicles.',
+    image: '/images/photos/hero-logistics.webp',
+    imageSm: '/images/photos/hero-logistics-sm.webp',
+    words: ['logistics.'],
   },
 };
+
+export const industryOrder: IndustryId[] = ['forestry', 'construction', 'agriculture', 'logistics'];

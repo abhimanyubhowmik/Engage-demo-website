@@ -123,8 +123,8 @@ const gallery = posts.flatMap((p) => p.data.gallery.map((g) => ({ ...g, post: p 
     cursor: pointer;
   }
   .news-filter button.is-active {
-    background: var(--green);
-    border-color: var(--green);
+    background: var(--accent);
+    border-color: var(--accent);
     color: var(--ink);
     font-weight: 600;
   }
@@ -166,7 +166,7 @@ const gallery = posts.flatMap((p) => p.data.gallery.map((g) => ({ ...g, post: p 
     height: 14px;
     border-radius: 50%;
     background: var(--bg-elev);
-    border: 2px solid var(--green);
+    border: 2px solid var(--accent);
   }
   .timeline__item.is-upcoming::before {
     background: var(--orange);
@@ -177,7 +177,7 @@ const gallery = posts.flatMap((p) => p.data.gallery.map((g) => ({ ...g, post: p 
     font-family: var(--font-display);
     font-stretch: 112%;
     font-weight: 750;
-    color: var(--green);
+    color: var(--accent);
   }
   .is-upcoming .timeline__date {
     color: var(--orange);
@@ -190,7 +190,7 @@ const gallery = posts.flatMap((p) => p.data.gallery.map((g) => ({ ...g, post: p 
     text-decoration: none;
   }
   .timeline h3 a:hover {
-    color: var(--green);
+    color: var(--accent);
   }
   .timeline p {
     display: flex;

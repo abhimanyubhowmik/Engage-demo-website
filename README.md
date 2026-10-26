@@ -10,7 +10,7 @@ Content lives in plain Markdown and TypeScript files, so adding a doctoral candi
 
 | Route | What it shows |
 | --- | --- |
-| `/` | Hero, numbers, industries, interactive point-cloud viewer, research objectives, DC carousel, consortium map, news, partner logos |
+| `/` | Hero whose headline word, background image and industry tab change together (forestry, construction & mining, agriculture, logistics), numbers, industries, research objectives, DC carousel, consortium map, news, network figure and partner logos |
 | `/research/` | The four research objectives with their doctoral projects, and how ENGAGE trains |
 | `/doctoral-candidates/` | All DCs with filters (theme, industry, host country, free-text search; filters are kept in the URL) |
 | `/doctoral-candidates/dc01/` … `dc13/` | One profile page per DC: project, background, supervision team, host, industrial partner |
@@ -27,13 +27,19 @@ Content lives in plain Markdown and TypeScript files, so adding a doctoral candi
 | A supervisor | `src/data/supervisors.ts` — DCs are linked automatically from each DC’s `supervisors` list |
 | A beneficiary / partner, or a map marker | `src/data/partners.ts` (`lat`/`lon` place the marker; partners in the same city are grouped) |
 | News and events | add a Markdown file to `src/content/news/` (cover image, category, optional `gallery`) |
-| Contacts, funding text, navigation, themes and industries | `src/data/site.ts` |
+| Contacts, funding text, navigation, research themes, industries (label, blurb, hero image, headline words) | `src/data/site.ts` |
+| Colours of the green and blue themes | the `:root[data-theme=…]` blocks at the top of `src/styles/global.css` |
 
 Images live in `public/images/`:
 
-- `people/` — DC portraits (3:4). Add `photo: /images/people/<file>.webp` to a DC or a supervisor; without one, a monogram is shown.
-- `news/` — event photos. `logos/` — partner logos. `brand/` — ENGAGE logo and icons.
-- `photos/` — the forest-machine key visual. `generated/` — procedural point-cloud artwork used for industries and themes.
+- `people/` — DC portraits (3:4); `people/supervisors/` — supervisor portraits (square). Set `photo` on a DC or supervisor; without one, a monogram is shown.
+- `news/` — event photos. `logos/` — partner logos. `brand/` — both ENGAGE logos (green theme, blue theme), the network figure and icons.
+- `photos/` — the industry key visuals (`hero-*.webp`, portrait) used by the home hero and industry tiles. `generated/` — procedural point-cloud artwork used for the research themes.
+
+## Themes
+
+The switch in the header toggles between the **green** (forest) and **blue** (navy) theme; the blue theme uses the gear-and-brain
+ENGAGE logo. The choice is remembered in the visitor’s browser.
 
 ## Develop
 

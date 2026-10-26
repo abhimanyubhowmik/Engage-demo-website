@@ -1,6 +1,6 @@
 // Supervisors as listed on dn-engage.eu/supervisors and on the doctoral-candidate profiles.
-// `photo` is optional: drop a square image into public/images/people/ and set the path to replace
-// the monogram. Each `about` is a short placeholder bio; send supervisors their entry to rewrite.
+// `photo` is optional: drop a square image into public/images/people/supervisors/ and set the path;
+// without one a monogram is shown. Each `about` is a short placeholder bio; send supervisors their entry to rewrite.
 // The DCs each person supervises are derived automatically from the DC profiles.
 
 export interface Supervisor {
@@ -24,6 +24,7 @@ export const supervisors: Supervisor[] = [
     partner: 'tau',
     unit: 'Autonomous Mobile Machines',
     kind: 'academic',
+    photo: '/images/people/supervisors/ghabcheloo.webp',
     about:
       'Coordinator of ENGAGE. Professor at Tampere University leading research on autonomous mobile machines — perception, motion control and navigation of heavy-duty machines.',
     links: {
@@ -38,6 +39,7 @@ export const supervisors: Supervisor[] = [
     partner: 'tau',
     unit: 'Computer Vision',
     kind: 'academic',
+    photo: '/images/people/supervisors/rahtu.webp',
     about: 'Professor at Tampere University working on computer vision and machine learning for perception and 3D scene understanding.',
     links: { website: 'https://esa.rahtu.fi/', scholar: 'https://scholar.google.com/citations?user=SmGZwHYAAAAJ&hl=en' },
   },
@@ -48,6 +50,7 @@ export const supervisors: Supervisor[] = [
     partner: 'tau',
     unit: 'Computer Vision Group',
     kind: 'academic',
+    photo: '/images/people/supervisors/kamarainen.webp',
     about: 'Professor in the Computer Vision Group at Tampere University, working on visual perception and robot learning for machines in the real world.',
     links: { website: 'https://research.tuni.fi/vision/' },
   },
@@ -57,6 +60,7 @@ export const supervisors: Supervisor[] = [
     title: 'Prof.',
     partner: 'tau',
     kind: 'academic',
+    photo: '/images/people/supervisors/alcan.webp',
     about: 'Supervises research on predictive force and loss models for the contact-aware control of hydraulic machines.',
     links: { website: 'https://www.gokhanalcan.com/', scholar: 'https://scholar.google.com/citations?user=XSVNKtwAAAAJ&hl=en' },
   },
@@ -67,6 +71,7 @@ export const supervisors: Supervisor[] = [
     partner: 'tum',
     unit: 'Chair of Perception for Intelligent Systems',
     kind: 'academic',
+    photo: '/images/people/supervisors/lilienthal.webp',
     about: 'Head of the Chair of Perception for Intelligent Systems at TUM, working on robot perception, 3D mapping and scene understanding.',
     links: {
       website: 'https://www.ce.cit.tum.de/pins/team/achim-j-lilienthal/',
@@ -80,6 +85,7 @@ export const supervisors: Supervisor[] = [
     partner: 'kit',
     unit: 'Institute of Vehicle System Technology — Mobile Machines',
     kind: 'academic',
+    photo: '/images/people/supervisors/geimer.webp',
     about: 'Heads the Chair of Mobile Machines at KIT’s Institute of Vehicle System Technology, covering safety, automation and drivetrains of off-road machines.',
     links: {
       website: 'https://www.fast.kit.edu/english/mobima/287_332.php',
@@ -92,6 +98,7 @@ export const supervisors: Supervisor[] = [
     title: 'Prof.',
     partner: 'fzi',
     kind: 'academic',
+    photo: '/images/people/supervisors/neumann.webp',
     about: 'Professor working on machine learning for robotics — reinforcement learning, imitation learning and expressive policies for complex manipulation.',
     links: {
       website: 'https://www.fzi.de/en/team/prof-dr-gerhard-neumann/',
@@ -113,6 +120,7 @@ export const supervisors: Supervisor[] = [
     partner: 'aalto',
     unit: 'Robot Learning',
     kind: 'academic',
+    photo: '/images/people/supervisors/pajarinen.webp',
     about: 'Professor at Aalto University leading research on robot learning, including reinforcement and offline learning for control.',
     links: {
       website: 'https://www.aalto.fi/en/people/joni-pajarinen',
@@ -126,6 +134,7 @@ export const supervisors: Supervisor[] = [
     partner: 'umu',
     unit: 'Department of Physics — Digital Physics',
     kind: 'academic',
+    photo: '/images/people/supervisors/servin.webp',
     about: 'Works on physics-based simulation of mobile machines, multibody dynamics and granular media.',
     links: { website: 'https://www.umu.se/en/staff/martin-servin/', scholar: 'https://scholar.google.com/citations?user=IqOUkOwAAAAJ&hl=en' },
   },
@@ -143,6 +152,7 @@ export const supervisors: Supervisor[] = [
     title: 'Dr.',
     partner: 'bosch-rexroth',
     kind: 'industry',
+    photo: '/images/people/supervisors/brach.webp',
     about: 'Industrial supervisor at Bosch Rexroth for multimodal perception and data-driven boom control.',
   },
   {
@@ -151,6 +161,7 @@ export const supervisors: Supervisor[] = [
     title: 'Dr.',
     partner: 'volvo-as',
     kind: 'industry',
+    photo: '/images/people/supervisors/loni.webp',
     about: 'Industrial supervisor at Volvo Autonomous Solutions for 4D mapping of mining sites and safe off-road navigation.',
   },
   {
@@ -159,6 +170,7 @@ export const supervisors: Supervisor[] = [
     title: 'Dr.',
     partner: 'novatron',
     kind: 'industry',
+    photo: '/images/people/supervisors/kolu.webp',
     about: 'Industrial supervisor at Novatron for as-built model updating and excavation control.',
   },
   {
@@ -167,6 +179,7 @@ export const supervisors: Supervisor[] = [
     title: 'M.Sc.',
     partner: 'ponsse',
     kind: 'industry',
+    photo: '/images/people/supervisors/einola.webp',
     about: 'Industrial supervisor at Ponsse for sensor-based positioning of forest machines.',
   },
   {
@@ -183,6 +196,7 @@ export const supervisors: Supervisor[] = [
     title: 'Dr.',
     partner: 'bosch',
     kind: 'industry',
+    photo: '/images/people/supervisors/demir.webp',
     about: 'Industrial supervisor at Bosch for sim-to-real transfer of learned control policies.',
   },
   {
@@ -199,6 +213,7 @@ export const supervisors: Supervisor[] = [
     title: 'Dr.',
     partner: 'algoryx',
     kind: 'industry',
+    photo: '/images/people/supervisors/wiberg.webp',
     about: 'Industrial supervisor at Algoryx Simulation for simulation intelligence of mobile working machines.',
   },
   {

@@ -108,6 +108,7 @@ export const partners: Partner[] = [
     lat: 63.8200,
     lon: 20.3070,
     website: 'https://www.umu.se/en/',
+    logo: '/images/logos/umea.png',
     about:
       'The Department of Physics develops physics-based simulation of mobile working machines, rigid bodies and granular soils.',
   },
@@ -248,6 +249,7 @@ export const partners: Partner[] = [
     lat: 48.135,
     lon: 11.555,
     website: 'https://www.tuvsud.com/',
+    logo: '/images/logos/tuv-sud.png',
     about: 'Testing, inspection and certification company; associated partner of the network.',
   },
   {
@@ -261,6 +263,7 @@ export const partners: Partner[] = [
     lat: 61.0587,
     lon: 28.1887,
     website: 'https://mevea.com/',
+    logo: '/images/logos/mevea.png',
     about: 'Real-time simulation and digital-twin software for machines; associated partner.',
   },
 ];

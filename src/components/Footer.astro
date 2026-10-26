@@ -10,7 +10,7 @@ const year = new Date().getFullYear();
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__brand">
-        <Logo width={170} />
+        <Logo width={170} layout="stacked" class="site-footer__logo" />
         <p>
           Educating Europe’s future engineers for the next generation of mobile working machines — AI-driven sustainability,
           productivity and safety.
@@ -63,7 +63,7 @@ const year = new Date().getFullYear();
 
 <style>
   .site-footer {
-    background: #040c09;
+    background: var(--bg-deep);
     border-top: 1px solid var(--line);
     padding-top: clamp(56px, 7vw, 88px);
     font-size: 0.95rem;
@@ -74,6 +74,9 @@ const year = new Date().getFullYear();
     grid-template-columns: 1.4fr 1fr 1.2fr;
     gap: 40px;
     padding-bottom: 48px;
+  }
+  .site-footer__brand :global(.logo__blue) {
+    width: 130px;
   }
   .site-footer__brand p {
     margin-top: 20px;
@@ -86,7 +89,7 @@ const year = new Date().getFullYear();
     text-transform: uppercase;
     letter-spacing: 0.14em;
     font-size: 0.78rem;
-    color: var(--green);
+    color: var(--accent);
     margin-bottom: 14px;
   }
   .site-footer__nav ul,
@@ -103,7 +106,7 @@ const year = new Date().getFullYear();
     text-decoration: none;
   }
   .site-footer a:hover {
-    color: var(--green);
+    color: var(--accent);
   }
   .site-footer__contact a {
     display: inline-flex;

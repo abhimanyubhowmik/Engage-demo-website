@@ -2,7 +2,7 @@ import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
 const themeIds = ['perception', 'control', 'safety', 'simulation'] as const;
-const industryIds = ['construction', 'mining', 'forestry', 'agriculture', 'logistics'] as const;
+const industryIds = ['construction', 'forestry', 'agriculture', 'logistics'] as const;
 
 const dcs = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/dcs' }),

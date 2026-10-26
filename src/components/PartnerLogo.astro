@@ -13,6 +13,6 @@ const { partner, class: cls } = Astro.props;
       <img src={url(partner.logo)} alt={partner.name} loading="lazy" decoding="async" />
     </span>
   ) : (
-    <span class={`logo-plate logo-plate--text ${cls ?? ''}`}>{partner.short === 'UMU' ? 'UMEÅ UNIVERSITY' : partner.name.toUpperCase()}</span>
+    <span class={`logo-plate logo-plate--text ${cls ?? ''}`}>{partner.name.toUpperCase()}</span>
   )
 }

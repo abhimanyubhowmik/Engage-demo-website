@@ -25,6 +25,14 @@ const isActive = (href: string) => path === href || path.startsWith(href);
         }
       </ul>
     </nav>
+    <div class="theme-switch" role="group" aria-label="Colour theme" data-theme-switch>
+      <button type="button" data-set-theme="green" aria-pressed="true" title="Green theme">
+        <span class="theme-switch__dot theme-switch__dot--green"></span><span class="sr-only">Green theme</span>
+      </button>
+      <button type="button" data-set-theme="blue" aria-pressed="false" title="Blue theme">
+        <span class="theme-switch__dot theme-switch__dot--blue"></span><span class="sr-only">Blue theme</span>
+      </button>
+    </div>
     <button class="site-header__toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
       <span class="sr-only">Menu</span>
       <Icon name="menu" size={24} class="icon-open" />
@@ -64,7 +72,7 @@ const isActive = (href: string) => path === href || path.startsWith(href);
   }
   .site-header.is-scrolled,
   .site-header.is-open {
-    background: rgb(6 18 14 / 0.86);
+    background: rgb(var(--bg-rgb) / 0.86);
     backdrop-filter: blur(14px) saturate(140%);
     border-bottom-color: var(--line);
   }
@@ -77,16 +85,60 @@ const isActive = (href: string) => path === href || path.startsWith(href);
     height: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 24px;
+    gap: 16px;
   }
   .site-header__brand {
     display: block;
     flex-shrink: 0;
   }
-  .site-header__brand :global(img) {
+  .site-header__brand :global(.logo__green img) {
     width: 118px;
-    height: auto;
+  }
+  .site-header__brand :global(.logo__blue) {
+    width: auto;
+    height: 46px;
+  }
+  .theme-switch {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 999px;
+    border: 1px solid var(--line-strong);
+    background: rgb(var(--bg-rgb) / 0.55);
+    backdrop-filter: blur(6px);
+  }
+  .theme-switch button {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+  }
+  .theme-switch button[aria-pressed='true'] {
+    background: rgb(255 255 255 / 0.14);
+  }
+  .theme-switch__dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px rgb(255 255 255 / 0.25);
+    transition: transform 0.2s var(--ease);
+  }
+  .theme-switch button:hover .theme-switch__dot {
+    transform: scale(1.15);
+  }
+  .theme-switch__dot--green {
+    background: linear-gradient(135deg, #5fe3a1, #0e241c);
+  }
+  .theme-switch__dot--blue {
+    background: linear-gradient(135deg, #5ab8f0, #142a49);
+  }
+  .site-nav {
+    margin-left: auto;
   }
   .site-nav ul {
     display: flex;
@@ -115,7 +167,7 @@ const isActive = (href: string) => path === href || path.startsWith(href);
   }
   .site-nav a[aria-current='page'] {
     color: var(--ink);
-    background: var(--green);
+    background: var(--accent);
   }
   .site-header__toggle {
     display: none;
@@ -168,7 +220,7 @@ const isActive = (href: string) => path === href || path.startsWith(href);
     text-decoration: none;
   }
   .mobile-menu a[aria-current='page'] {
-    color: var(--green);
+    color: var(--accent);
   }
   .mobile-menu__foot {
     color: var(--muted);
@@ -182,10 +234,34 @@ const isActive = (href: string) => path === href || path.startsWith(href);
     .site-header__toggle {
       display: grid;
     }
+    .theme-switch {
+      margin-left: auto;
+    }
   }
 </style>
 
 <script>
+  // colour theme switch (green / blue), remembered per browser
+  const themeButtons = document.querySelectorAll<HTMLButtonElement>('[data-set-theme]');
+  const themeColors: Record<string, string> = { green: '#06120e', blue: '#0b1a30' };
+  const applyTheme = (theme: string) => {
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme] ?? themeColors.green);
+    themeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setTheme === theme)));
+  };
+  applyTheme(document.documentElement.dataset.theme === 'blue' ? 'blue' : 'green');
+  themeButtons.forEach((b) =>
+    b.addEventListener('click', () => {
+      const theme = b.dataset.setTheme!;
+      applyTheme(theme);
+      try {
+        localStorage.setItem('engage-theme', theme);
+      } catch {
+        /* storage unavailable: the choice lasts for this page only */
+      }
+    }),
+  );
+
   const header = document.querySelector<HTMLElement>('[data-header]');
   const toggle = document.querySelector<HTMLButtonElement>('[data-menu-toggle]');
   const menu = document.querySelector<HTMLElement>('[data-mobile-menu]');

@@ -135,12 +135,12 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
         <title id="pmap-title">Map of ENGAGE beneficiaries and partners in Finland, Sweden, Germany and Austria</title>
         <defs>
           <radialGradient id="pmap-glow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#5fe3a1" stop-opacity="0.55" />
-            <stop offset="100%" stop-color="#5fe3a1" stop-opacity="0" />
+            <stop offset="0%" style="stop-color: var(--accent)" stop-opacity="0.55" />
+            <stop offset="100%" style="stop-color: var(--accent)" stop-opacity="0" />
           </radialGradient>
           <linearGradient id="pmap-arc" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#5fe3a1" />
-            <stop offset="100%" stop-color="#f7a823" />
+            <stop offset="0%" style="stop-color: var(--accent)" />
+            <stop offset="100%" style="stop-color: var(--orange)" />
           </linearGradient>
         </defs>
         <path class="pmap__graticule" d={graticule} />
@@ -331,8 +331,8 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
     border-radius: var(--radius);
     border: 1px solid var(--line);
     background:
-      radial-gradient(800px 600px at 60% 30%, rgb(95 227 161 / 0.07), transparent 60%),
-      #071611;
+      radial-gradient(800px 600px at 60% 30%, rgb(var(--accent-rgb) / 0.07), transparent 60%),
+      var(--map-bg);
     overflow: hidden;
   }
   .pmap__svg {
@@ -341,22 +341,22 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
   }
   .pmap__graticule {
     fill: none;
-    stroke: rgb(95 227 161 / 0.07);
+    stroke: rgb(var(--accent-rgb) / 0.07);
     stroke-width: 1;
   }
   .pmap__countries path {
-    fill: #0f2a21;
-    stroke: #1f4537;
+    fill: var(--map-land);
+    stroke: var(--map-stroke);
     stroke-width: 0.8;
     transition: fill 0.3s;
   }
   .pmap__countries path.is-member {
-    fill: #17493a;
-    stroke: #3a8a6c;
+    fill: var(--map-member);
+    stroke: var(--map-member-stroke);
     stroke-width: 1.1;
   }
   .pmap__country-labels text {
-    fill: rgb(188 209 198 / 0.4);
+    fill: rgb(var(--text2-rgb) / 0.4);
     font-family: var(--font-display);
     font-stretch: 125%;
     font-weight: 800;
@@ -407,7 +407,7 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
     opacity: 1;
   }
   .pmap__dot.is-academic {
-    fill: var(--green);
+    fill: var(--accent);
   }
   .pmap__dot.is-industry {
     fill: var(--orange);
@@ -417,7 +417,7 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
   }
   .pmap__ring {
     fill: none;
-    stroke: #071611;
+    stroke: var(--map-bg);
     stroke-width: 2.5;
   }
   .pmap__marker:focus-visible .pmap__ring,
@@ -426,7 +426,7 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
   }
   .pmap__pulse {
     fill: none;
-    stroke: var(--green);
+    stroke: var(--accent);
     stroke-width: 2;
     transform-origin: center;
     transform-box: fill-box;
@@ -457,7 +457,7 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
     font-weight: 650;
     font-size: 19px;
     paint-order: stroke;
-    stroke: #071611;
+    stroke: var(--map-bg);
     stroke-width: 4px;
     stroke-linejoin: round;
     pointer-events: none;
@@ -473,7 +473,7 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
     max-width: 280px;
     padding: 12px 14px;
     border-radius: 12px;
-    background: rgb(4 12 9 / 0.94);
+    background: rgb(var(--deep-rgb) / 0.94);
     border: 1px solid var(--line-strong);
     box-shadow: var(--shadow);
     font-size: 0.85rem;
@@ -504,7 +504,7 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
     color: var(--text-2);
     padding: 8px 12px;
     border-radius: 10px;
-    background: rgb(4 12 9 / 0.7);
+    background: rgb(var(--deep-rgb) / 0.7);
   }
   .pmap__legend span {
     display: inline-flex;
@@ -517,7 +517,7 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
     border-radius: 50%;
   }
   .pmap__legend i.is-academic {
-    background: var(--green);
+    background: var(--accent);
   }
   .pmap__legend i.is-industry {
     background: var(--orange);
@@ -529,7 +529,7 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
     width: 18px;
     height: 2px;
     border-radius: 2px;
-    background: linear-gradient(90deg, var(--green), var(--orange));
+    background: linear-gradient(90deg, var(--accent), var(--orange));
   }
   .pmap__panel {
     position: sticky;
@@ -580,11 +580,11 @@ const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
     transition: transform 0.2s;
   }
   .pmap__site-list button:hover span {
-    color: var(--green);
+    color: var(--accent);
   }
   .pmap__site-list button:hover :global(svg) {
     transform: translateX(3px);
-    color: var(--green);
+    color: var(--accent);
   }
   .pmap__back {
     display: inline-flex;
