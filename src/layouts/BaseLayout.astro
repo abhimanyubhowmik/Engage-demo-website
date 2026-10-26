@@ -16,14 +16,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(url(image), Astro.site);
 ---
 <!doctype html>
-<html lang="en" data-theme="green">
+<html lang="en" data-theme="blue">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
-    <meta name="theme-color" content="#06120e" />
+    <meta name="theme-color" content="#0b1a30" />
     <link rel="icon" type="image/png" sizes="32x32" href={url('/images/brand/favicon-32.png')} />
     <link rel="icon" type="image/png" sizes="512x512" href={url('/images/brand/icon-512.png')} />
     <link rel="apple-touch-icon" href={url('/images/brand/apple-touch-icon.png')} />
@@ -37,7 +37,7 @@ const ogImage = new URL(url(image), Astro.site);
     <script is:inline>
       document.documentElement.classList.add('js');
       try {
-        if (localStorage.getItem('engage-theme') === 'blue') document.documentElement.dataset.theme = 'blue';
+        if (localStorage.getItem('engage-theme') === 'green') document.documentElement.dataset.theme = 'green';
       } catch (e) {}
     </script>
   </head>

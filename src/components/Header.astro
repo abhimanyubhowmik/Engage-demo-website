@@ -26,11 +26,11 @@ const isActive = (href: string) => path === href || path.startsWith(href);
       </ul>
     </nav>
     <div class="theme-switch" role="group" aria-label="Colour theme" data-theme-switch>
-      <button type="button" data-set-theme="green" aria-pressed="true" title="Green theme">
-        <span class="theme-switch__dot theme-switch__dot--green"></span><span class="sr-only">Green theme</span>
-      </button>
-      <button type="button" data-set-theme="blue" aria-pressed="false" title="Blue theme">
+      <button type="button" data-set-theme="blue" aria-pressed="true" title="Blue theme">
         <span class="theme-switch__dot theme-switch__dot--blue"></span><span class="sr-only">Blue theme</span>
+      </button>
+      <button type="button" data-set-theme="green" aria-pressed="false" title="Green theme">
+        <span class="theme-switch__dot theme-switch__dot--green"></span><span class="sr-only">Green theme</span>
       </button>
     </div>
     <button class="site-header__toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
@@ -91,12 +91,15 @@ const isActive = (href: string) => path === href || path.startsWith(href);
     display: block;
     flex-shrink: 0;
   }
-  .site-header__brand :global(.logo__green img) {
-    width: 118px;
+  .site-header__brand :global(.logo) {
+    gap: 9px;
   }
-  .site-header__brand :global(.logo__blue) {
+  .site-header__brand :global(.logo__word img) {
+    width: 112px;
+  }
+  .site-header__brand :global(.logo__icon) {
     width: auto;
-    height: 46px;
+    height: 58px;
   }
   .theme-switch {
     display: inline-flex;
@@ -238,6 +241,14 @@ const isActive = (href: string) => path === href || path.startsWith(href);
       margin-left: auto;
     }
   }
+  @media (max-width: 420px) {
+    .site-header__brand :global(.logo__word img) {
+      width: 96px;
+    }
+    .site-header__brand :global(.logo__icon) {
+      height: 48px;
+    }
+  }
 </style>
 
 <script>
@@ -246,10 +257,10 @@ const isActive = (href: string) => path === href || path.startsWith(href);
   const themeColors: Record<string, string> = { green: '#06120e', blue: '#0b1a30' };
   const applyTheme = (theme: string) => {
     document.documentElement.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme] ?? themeColors.green);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColors[theme] ?? themeColors.blue);
     themeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setTheme === theme)));
   };
-  applyTheme(document.documentElement.dataset.theme === 'blue' ? 'blue' : 'green');
+  applyTheme(document.documentElement.dataset.theme === 'green' ? 'green' : 'blue');
   themeButtons.forEach((b) =>
     b.addEventListener('click', () => {
       const theme = b.dataset.setTheme!;
