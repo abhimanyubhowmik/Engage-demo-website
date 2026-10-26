@@ -81,8 +81,8 @@ const isPostNominal = personName(s.name, s.title) !== `${s.title} ${s.name}`;
     height: 100%;
   }
   .sup-card:target {
-    border-color: var(--green);
-    box-shadow: 0 0 0 3px rgb(95 227 161 / 0.2);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgb(var(--accent-rgb) / 0.2);
   }
   .sup-card__head {
     display: grid;
@@ -111,7 +111,7 @@ const isPostNominal = personName(s.name, s.title) !== `${s.title} ${s.name}`;
     font-family: var(--font-display);
     font-stretch: 110%;
     font-weight: 700;
-    color: var(--green);
+    color: var(--accent);
   }
   .sup-card[data-kind='industry'] .sup-card__kind {
     color: var(--orange);
@@ -177,7 +177,7 @@ const isPostNominal = personName(s.name, s.title) !== `${s.title} ${s.name}`;
     color: var(--text);
   }
   .sup-card__dcs a:hover span:last-child {
-    color: var(--green);
+    color: var(--accent);
   }
   .sup-card__links {
     margin-top: auto;
@@ -196,6 +196,6 @@ const isPostNominal = personName(s.name, s.title) !== `${s.title} ${s.name}`;
     text-decoration: none;
   }
   .sup-card__links a:hover {
-    color: var(--green);
+    color: var(--accent);
   }
 </style>

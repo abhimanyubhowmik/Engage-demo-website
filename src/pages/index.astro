@@ -5,8 +5,7 @@ import DcCard from '../components/DcCard.astro';
 import NewsCard from '../components/NewsCard.astro';
 import PartnerMap from '../components/PartnerMap.astro';
 import PartnerLogo from '../components/PartnerLogo.astro';
-import PointCloudViewer from '../components/PointCloudViewer.astro';
-import { industries, themes, type IndustryId, type ThemeId } from '../data/site';
+import { industries, industryOrder, themes, type ThemeId } from '../data/site';
 import { getDcs, getNews, partners, dcPath } from '../lib/data';
 import { url, dcLabel } from '../lib/url';
 
@@ -15,33 +14,39 @@ const news = (await getNews()).slice(0, 3);
 const academic = partners.filter((p) => p.type === 'academic').length;
 const companies = partners.filter((p) => p.type === 'industry').length;
 const keywords = [...new Set(dcs.flatMap((d) => d.data.keywords))];
-const rotating = ['worksite.', 'mine.', 'forest.', 'farm.', 'harbour.', 'real world.'];
-const industryOrder: IndustryId[] = ['construction', 'mining', 'forestry', 'agriculture', 'logistics'];
+// one headline word per step; each industry keeps its background for all of its words
+const heroWords = industryOrder.flatMap((id) => industries[id].words.map((word) => ({ word, industry: id })));
 const themeOrder: ThemeId[] = ['perception', 'control', 'safety', 'simulation'];
-const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
 ---
 <BaseLayout>
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero" data-hero>
     <div class="hero__media" aria-hidden="true">
-      <picture>
-        <source media="(max-width: 700px)" srcset={url('/images/photos/forest-portrait.webp')} />
-        <img
-          src={url('/images/photos/forest-hero.webp')}
-          srcset={`${url('/images/photos/forest-hero-md.webp')} 1280w, ${url('/images/photos/forest-hero.webp')} 2400w`}
-          sizes="100vw"
-          alt=""
-          fetchpriority="high"
-        />
-      </picture>
+      {
+        industryOrder.map((id, i) => (
+          <img
+            class:list={['hero__slide', { 'is-active': i === 0 }]}
+            data-slide={id}
+            src={url(industries[id].image)}
+            srcset={`${url(industries[id].imageSm)} 720w, ${url(industries[id].image)} 1080w`}
+            sizes="(max-width: 700px) 100vw, 64vw"
+            alt=""
+            fetchpriority={i === 0 ? 'high' : 'low'}
+            decoding="async"
+          />
+        ))
+      }
     </div>
     <div class="hero__scan" aria-hidden="true"></div>
     <div class="container hero__content">
       <p class="eyebrow">Marie Skłodowska-Curie Doctoral Network · 2025–2029</p>
       <h1 class="display hero__title">
-        Intelligence<br />for the
-        <span class="hero__rotator" data-rotator>
-          {rotating.map((w, i) => <span class:list={{ 'is-active': i === rotating.length - 1 }}>{w}</span>)}
+        <span class="sr-only">Intelligence for forestry, construction, mining, agriculture and logistics</span>
+        <span aria-hidden="true">
+          Intelligence<br />for
+          <span class="hero__rotator" data-rotator>
+            {heroWords.map((w, i) => <span class:list={{ 'is-active': i === 0 }} data-industry={w.industry}>{w.word}</span>)}
+          </span>
         </span>
       </h1>
       <p class="lead hero__lead">
@@ -51,6 +56,16 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
       <div class="hero__actions">
         <a class="btn" href={url('/doctoral-candidates/')}>Meet the doctoral candidates <Icon name="arrow-right" /></a>
         <a class="btn btn--ghost" href={url('/research/')}>Explore the research</a>
+      </div>
+      <div class="hero__tabs" role="group" aria-label="Show an industry">
+        {
+          industryOrder.map((id, i) => (
+            <button type="button" class:list={['hero__tab', { 'is-active': i === 0 }]} data-tab={id} aria-pressed={i === 0 ? 'true' : 'false'}>
+              <span>{industries[id].label}</span>
+              <i aria-hidden="true" />
+            </button>
+          ))
+        }
       </div>
     </div>
     <div class="hero__ticker" aria-hidden="true">
@@ -91,7 +106,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
       </div>
       <div class="mission__text" data-reveal style="--reveal-delay:120ms">
         <p class="lead">
-          Mobile working machines are everywhere in mining, construction, harbours, forestry and farming — and vital to a sustainable,
+          Mobile working machines are everywhere in construction, mining, forestry, agriculture and logistics — and vital to a sustainable,
           productive society.
         </p>
         <p>
@@ -110,7 +125,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
       <div class="section-head">
         <div>
           <p class="eyebrow">Where our machines work</p>
-          <h2 class="display h2" id="industries-title">One network, five industries</h2>
+          <h2 class="display h2" id="industries-title">One network, four industries</h2>
         </div>
         <a class="link-arrow" href={url('/doctoral-candidates/')}>All projects <Icon name="arrow-right" /></a>
       </div>
@@ -120,8 +135,8 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
             const ind = industries[id];
             const count = dcs.filter((d) => d.data.industries.includes(id)).length;
             return (
-              <a class:list={['industry', { 'industry--lead': i === 0 }]} href={url(`/doctoral-candidates/?industry=${id}`)} data-reveal style={`--reveal-delay:${i * 70}ms`}>
-                <img src={url(ind.image)} alt="" loading="lazy" decoding="async" />
+              <a class="industry" href={url(`/doctoral-candidates/?industry=${id}`)} data-reveal style={`--reveal-delay:${i * 70}ms`}>
+                <img src={url(ind.imageSm)} alt="" loading="lazy" decoding="async" />
                 <span class="industry__body">
                   <span class="industry__count">{count} {count === 1 ? 'project' : 'projects'}</span>
                   <span class="industry__title">{ind.label}</span>
@@ -134,40 +149,6 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
             );
           })
         }
-      </div>
-    </div>
-  </section>
-
-  <!-- POINT CLOUD -->
-  <section class="section perception">
-    <div class="container perception__grid">
-      <div data-reveal>
-        <p class="eyebrow">Perception</p>
-        <h2 class="display h2 perception__title">See the worksite the way a machine does</h2>
-        <p class="lead">
-          Before a machine can dig, haul or harvest on its own, it has to understand a world that changes every hour — soil, rocks, trees, other
-          machines and people.
-        </p>
-        <p class="muted">
-          Our perception projects fuse LiDAR, cameras, radar, GNSS/IMU and the machine’s own proprioception into 3D and 4D representations
-          that capture geometry, semantics and change over time.
-        </p>
-        <ul class="perception__dcs">
-          {
-            perceptionDcs.map((dc) => (
-              <li>
-                <a href={url(dcPath(dc))}>
-                  <span class="badge-dc">{dcLabel(dc.data.number)}</span>
-                  <span>{dc.data.shortTitle}</span>
-                  <Icon name="arrow-right" size={16} />
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-      <div data-reveal style="--reveal-delay:120ms">
-        <PointCloudViewer />
       </div>
     </div>
   </section>
@@ -294,9 +275,29 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
   </section>
 
   <!-- PARTNER LOGOS -->
-  <section class="section section--tight logos" aria-labelledby="logos-title">
+  <section class="section logos" aria-labelledby="logos-title">
     <div class="container">
-      <p class="eyebrow" id="logos-title">Our partners</p>
+      <div class="logos__intro">
+        <figure class="logos__figure" data-reveal>
+          <img
+            src={url('/images/brand/network-figure.webp')}
+            width="1100"
+            height="935"
+            alt="The ENGAGE network: 13 doctoral candidates at the centre, surrounded by the construction and mining, forestry, agriculture and logistics sectors, the industrial suppliers and the academic partners"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+        <div data-reveal style="--reveal-delay:100ms">
+          <p class="eyebrow">Our partners</p>
+          <h2 class="display h2" id="logos-title">Industry and academia, side by side</h2>
+          <p class="lead">
+            Machine manufacturers, technology suppliers and six academic groups share 13 doctoral projects — every candidate works with both a
+            university and a company.
+          </p>
+          <a class="link-arrow" href={url('/consortium/')}>Meet the consortium <Icon name="arrow-right" /></a>
+        </div>
+      </div>
       <ul class="logos__grid">
         {
           partners.map((p) => (
@@ -336,25 +337,30 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     isolation: isolate;
     overflow: hidden;
   }
+  /* portrait industry images sit on the right and fade into the page background on the left */
   .hero__media {
     position: absolute;
-    inset: 0;
+    inset: 0 0 0 auto;
+    width: 64%;
     z-index: -3;
+    mask-image: linear-gradient(90deg, transparent 0%, #000 30%);
   }
-  .hero__media img {
+  .hero__slide {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 70% 40%;
-    animation: hero-zoom 24s ease-out both;
+    object-position: 50% 62%;
+    opacity: 0;
+    transform: scale(1.07);
+    transition:
+      opacity 1.4s var(--ease),
+      transform 7s ease-out;
   }
-  @keyframes hero-zoom {
-    from {
-      transform: scale(1.08);
-    }
-    to {
-      transform: scale(1);
-    }
+  .hero__slide.is-active {
+    opacity: 1;
+    transform: scale(1);
   }
   .hero::before {
     content: '';
@@ -362,15 +368,15 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     inset: 0;
     z-index: -2;
     background:
-      linear-gradient(90deg, rgb(4 14 11 / 0.92) 0%, rgb(4 14 11 / 0.65) 38%, rgb(4 14 11 / 0.05) 70%),
-      linear-gradient(180deg, rgb(4 14 11 / 0.55) 0%, transparent 25%, transparent 60%, var(--bg) 100%);
+      linear-gradient(90deg, rgb(var(--deep-rgb) / 0.92) 0%, rgb(var(--deep-rgb) / 0.6) 40%, rgb(var(--deep-rgb) / 0) 72%),
+      linear-gradient(180deg, rgb(var(--deep-rgb) / 0.55) 0%, transparent 25%, transparent 60%, var(--bg) 100%);
   }
   .hero__scan {
     position: absolute;
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    background: linear-gradient(180deg, transparent 0%, rgb(95 227 161 / 0.09) 48%, rgb(95 227 161 / 0.22) 50%, transparent 52%);
+    background: linear-gradient(180deg, transparent 0%, rgb(var(--accent-rgb) / 0.09) 48%, rgb(var(--accent-rgb) / 0.22) 50%, transparent 52%);
     background-size: 100% 240%;
     mix-blend-mode: screen;
     animation: hero-scan 7s cubic-bezier(0.6, 0, 0.4, 1) infinite;
@@ -388,9 +394,8 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     padding-bottom: 56px;
   }
   .hero__title {
-    font-size: clamp(2.1rem, 8.2vw, 7.4rem);
+    font-size: clamp(2.1rem, 7.2vw, 6.4rem);
     margin-bottom: 28px;
-    max-width: 12ch;
   }
   .hero__rotator {
     display: grid;
@@ -408,6 +413,63 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
   .hero__rotator span.is-active {
     opacity: 1;
     transform: none;
+  }
+  .hero__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 40px;
+  }
+  .hero__tab {
+    position: relative;
+    overflow: hidden;
+    padding: 9px 16px 11px;
+    border-radius: 10px;
+    border: 1px solid rgb(255 255 255 / 0.16);
+    background: rgb(var(--deep-rgb) / 0.55);
+    backdrop-filter: blur(6px);
+    color: var(--text-2);
+    font-family: var(--font-display);
+    font-stretch: 108%;
+    font-weight: 650;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition:
+      color 0.3s,
+      border-color 0.3s;
+  }
+  .hero__tab:hover {
+    color: var(--text);
+  }
+  .hero__tab.is-active {
+    color: var(--text);
+    border-color: rgb(var(--accent-rgb) / 0.6);
+  }
+  .hero__tab i {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    width: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .hero__tab.is-active i {
+    transform: scaleX(1);
+  }
+  .hero.is-playing .hero__tab.is-active i {
+    animation: hero-progress var(--dur, 5s) linear both;
+  }
+  @keyframes hero-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
   }
   .hero__lead {
     color: var(--text);
@@ -447,7 +509,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     white-space: nowrap;
   }
   .hero__ticker-group span:nth-of-type(3n + 1) {
-    color: var(--green);
+    color: var(--accent);
   }
   .hero__ticker-group span:nth-of-type(3n + 2) {
     color: var(--text);
@@ -493,7 +555,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     color: var(--text);
   }
   .stat:nth-child(odd) strong {
-    color: var(--green);
+    color: var(--accent);
   }
   .stat span {
     display: block;
@@ -518,23 +580,19 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
   /* industries */
   .industries__grid {
     display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr;
-    grid-template-rows: repeat(2, minmax(260px, auto));
+    grid-template-columns: repeat(4, 1fr);
     gap: 16px;
   }
   .industry {
     position: relative;
     display: flex;
     align-items: flex-end;
-    min-height: 260px;
+    aspect-ratio: 3 / 4.3;
     border-radius: var(--radius);
     overflow: hidden;
     text-decoration: none;
     isolation: isolate;
     border: 1px solid var(--line);
-  }
-  .industry--lead {
-    grid-row: span 2;
   }
   .industry img {
     position: absolute;
@@ -550,7 +608,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, rgb(4 14 11 / 0.1) 10%, rgb(4 14 11 / 0.55) 45%, rgb(4 14 11 / 0.94) 100%);
+    background: linear-gradient(180deg, rgb(var(--deep-rgb) / 0) 25%, rgb(var(--deep-rgb) / 0.45) 55%, rgb(var(--deep-rgb) / 0.95) 100%);
   }
   .industry:hover img {
     transform: scale(1.06);
@@ -565,7 +623,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     font-size: 0.75rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--green);
+    color: var(--accent);
     font-weight: 700;
   }
   .industry__title {
@@ -573,11 +631,8 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     font-stretch: 118%;
     font-weight: 820;
     text-transform: uppercase;
-    font-size: clamp(1.4rem, 2.2vw, 2rem);
-    line-height: 1;
-  }
-  .industry--lead .industry__title {
-    font-size: clamp(1.7rem, 2.7vw, 2.4rem);
+    font-size: clamp(1.35rem, 1.9vw, 1.75rem);
+    line-height: 1.02;
   }
   .industry__blurb {
     color: var(--text-2);
@@ -593,7 +648,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgb(4 14 11 / 0.6);
+    background: rgb(var(--deep-rgb) / 0.6);
     border: 1px solid rgb(255 255 255 / 0.2);
     transition:
       background-color 0.3s,
@@ -604,46 +659,6 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     background: var(--orange);
     color: var(--ink);
     transform: rotate(45deg);
-  }
-
-  /* perception */
-  .perception__grid {
-    display: grid;
-    grid-template-columns: 1fr 1.25fr;
-    gap: clamp(32px, 5vw, 72px);
-    align-items: center;
-  }
-  .perception__title {
-    font-size: clamp(2rem, 3.4vw, 2.9rem);
-  }
-  .perception__dcs {
-    list-style: none;
-    margin: 24px 0 0;
-    padding: 0;
-    border-top: 1px solid var(--line);
-  }
-  .perception__dcs li {
-    border-bottom: 1px solid var(--line);
-  }
-  .perception__dcs a {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 2px;
-    text-decoration: none;
-    font-weight: 550;
-  }
-  .perception__dcs a :global(svg) {
-    color: var(--muted);
-    transition: transform 0.2s;
-  }
-  .perception__dcs a:hover {
-    color: var(--green);
-  }
-  .perception__dcs a:hover :global(svg) {
-    transform: translateX(3px);
-    color: var(--green);
   }
 
   /* themes */
@@ -659,7 +674,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     background: #fff;
     border: 1px solid var(--paper-2);
     overflow: hidden;
-    box-shadow: 0 18px 40px -30px rgb(13 38 32 / 0.5);
+    box-shadow: 0 18px 40px -30px rgb(var(--ink-rgb) / 0.5);
   }
   .theme__media {
     position: relative;
@@ -735,9 +750,9 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     transition: all 0.2s;
   }
   .carousel-btn:hover {
-    background: var(--green);
+    background: var(--accent);
     color: var(--ink);
-    border-color: var(--green);
+    border-color: var(--accent);
   }
   .carousel__track {
     display: grid;
@@ -802,6 +817,20 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
   }
 
   /* logos */
+  .logos__intro {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+    margin-bottom: clamp(40px, 5vw, 64px);
+  }
+  .logos__figure {
+    margin: 0;
+  }
+  .logos__figure img {
+    width: 100%;
+    height: auto;
+  }
   .logos__grid {
     list-style: none;
     margin: 0;
@@ -823,6 +852,9 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
   .logos__grid :global(.logo-plate img) {
     max-height: 50px;
     max-width: 88%;
+  }
+  .logos__grid :global(.logo-plate img[src$='tuv-sud.png']) {
+    max-height: 62px;
   }
   .logos__grid :global(.logo-plate--text) {
     font-size: 0.85rem;
@@ -849,7 +881,7 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(180deg, var(--bg) 0%, rgb(6 18 14 / 0.7) 35%, rgb(6 18 14 / 0.75) 65%, #040c09 100%);
+    background: linear-gradient(180deg, var(--bg) 0%, rgb(var(--bg-rgb) / 0.7) 35%, rgb(var(--bg-rgb) / 0.75) 65%, var(--bg-deep) 100%);
   }
   .cta__inner {
     display: flex;
@@ -869,17 +901,11 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     }
     .industries__grid {
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: none;
-    }
-    .industry--lead {
-      grid-row: auto;
-      grid-column: span 2;
-      min-height: 340px;
     }
   }
   @media (max-width: 900px) {
     .mission__grid,
-    .perception__grid,
+    .logos__intro,
     .map-teaser__grid {
       grid-template-columns: 1fr;
     }
@@ -897,12 +923,14 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     }
   }
   @media (max-width: 600px) {
-    .industries__grid,
     .themes__grid {
       grid-template-columns: 1fr;
     }
-    .industry--lead {
-      grid-column: auto;
+    .industries__grid {
+      grid-template-columns: 1fr;
+    }
+    .industry {
+      aspect-ratio: 4 / 3.4;
     }
     .stats__grid {
       grid-template-columns: repeat(2, 1fr);
@@ -925,28 +953,83 @@ const perceptionDcs = dcs.filter((d) => d.data.theme === 'perception');
     .carousel__track {
       grid-auto-columns: 78vw;
     }
-    .hero__media img {
-      object-position: 62% 50%;
+    .hero__media {
+      width: 100%;
+      mask-image: none;
     }
     .hero::before {
-      background: linear-gradient(180deg, rgb(4 14 11 / 0.6) 0%, rgb(4 14 11 / 0.35) 30%, rgb(4 14 11 / 0.85) 70%, var(--bg) 100%);
+      background: linear-gradient(180deg, rgb(var(--deep-rgb) / 0.72) 0%, rgb(var(--deep-rgb) / 0.62) 35%, rgb(var(--deep-rgb) / 0.9) 68%, var(--bg) 100%);
+    }
+    .hero__tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      margin-inline: calc(-1 * var(--gutter));
+      padding-inline: var(--gutter);
+      scrollbar-width: none;
+    }
+    .hero__tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .hero__tab {
+      flex-shrink: 0;
     }
   }
 </style>
 
 <script>
-  // rotating headline word
-  const rot = document.querySelector<HTMLElement>('[data-rotator]');
-  if (rot && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const words = [...rot.children] as HTMLElement[];
-    let i = words.length - 1;
-    const step = () => {
-      words[i].classList.remove('is-active');
-      i = (i + 1) % words.length;
-      words[i].classList.add('is-active');
-      setTimeout(step, i === words.length - 1 ? 4200 : 1900);
+  // hero: the headline word, the background image and the industry tab move together
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  if (hero) {
+    const words = [...hero.querySelectorAll<HTMLElement>('[data-rotator] > span')];
+    const slides = [...hero.querySelectorAll<HTMLElement>('[data-slide]')];
+    const tabs = [...hero.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+    const STEP = 2800;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let index = 0;
+    let timer = 0;
+    const show = (i: number, restart = false) => {
+      index = (i + words.length) % words.length;
+      const industry = words[index].dataset.industry;
+      words.forEach((w, k) => w.classList.toggle('is-active', k === index));
+      slides.forEach((sl) => sl.classList.toggle('is-active', sl.dataset.slide === industry));
+      for (const t of tabs) {
+        const on = t.dataset.tab === industry;
+        t.setAttribute('aria-pressed', String(on));
+        if (!on) {
+          t.classList.remove('is-active');
+        } else if (restart || !t.classList.contains('is-active')) {
+          // the progress bar runs for as long as this industry stays on screen
+          const remaining = words.slice(index).filter((w) => w.dataset.industry === industry).length;
+          t.style.setProperty('--dur', `${remaining * STEP}ms`);
+          t.classList.remove('is-active');
+          void t.offsetWidth;
+          t.classList.add('is-active');
+        }
+      }
     };
-    setTimeout(step, 3200);
+    const schedule = () => {
+      clearTimeout(timer);
+      if (reduce || document.hidden) return;
+      timer = window.setTimeout(() => {
+        show(index + 1);
+        schedule();
+      }, STEP);
+    };
+    tabs.forEach((t) =>
+      t.addEventListener('click', () => {
+        show(
+          words.findIndex((w) => w.dataset.industry === t.dataset.tab),
+          true,
+        );
+        schedule();
+      }),
+    );
+    if (!reduce) {
+      hero.classList.add('is-playing');
+      show(0, true);
+      document.addEventListener('visibilitychange', schedule);
+      schedule();
+    }
   }
   // carousel buttons
   const track = document.querySelector<HTMLElement>('[data-carousel-track]');

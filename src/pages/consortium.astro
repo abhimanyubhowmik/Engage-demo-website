@@ -29,6 +29,24 @@ const associated = partners.filter((p) => p.role === 'associated');
 
   <section class="section section--elev">
     <div class="container">
+      <div class="network">
+        <div>
+          <p class="eyebrow">The network</p>
+          <h2 class="display h2">Sectors, suppliers and academics around 13 DCs</h2>
+          <p class="lead">
+            Machine manufacturers from construction and mining, forestry and agriculture, technology suppliers and academic groups each
+            co-supervise doctoral projects — so every candidate works with both a university and a company.
+          </p>
+        </div>
+        <img
+          src={url('/images/brand/network-figure.webp')}
+          width="1100"
+          height="935"
+          alt="The ENGAGE network: 13 doctoral candidates at the centre, surrounded by the construction and mining, forestry, agriculture and logistics sectors, the industrial suppliers and the academic partners"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
       <div class="section-head">
         <div>
           <p class="eyebrow">Directory</p>
@@ -85,6 +103,22 @@ const associated = partners.filter((p) => p.role === 'associated');
 </BaseLayout>
 
 <style>
+  .network {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr;
+    gap: clamp(32px, 5vw, 72px);
+    align-items: center;
+    margin-bottom: clamp(56px, 7vw, 96px);
+  }
+  .network img {
+    width: 100%;
+    height: auto;
+  }
+  @media (max-width: 900px) {
+    .network {
+      grid-template-columns: 1fr;
+    }
+  }
   .country + .country {
     margin-top: 48px;
   }
@@ -103,7 +137,7 @@ const associated = partners.filter((p) => p.role === 'associated');
   .country__name span {
     font-size: 0.85rem;
     color: var(--ink);
-    background: var(--green);
+    background: var(--accent);
     border-radius: 999px;
     padding: 2px 10px;
   }

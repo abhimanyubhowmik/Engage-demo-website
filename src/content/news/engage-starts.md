@@ -7,7 +7,7 @@ cover: /images/generated/offroad-scan.webp
 coverAlt: Point-cloud visualisation of off-road terrain scanned by a mobile machine
 ---
 
-Mobile working machines are ubiquitous in mining, construction, harbours, forestry, and farming, and vital for the economic and industrial advancement of our society — and as such key to its sustainability and productivity.
+Mobile working machines are ubiquitous in construction, mining, forestry, agriculture and logistics, and vital for the economic and industrial advancement of our society — and as such key to its sustainability and productivity.
 
 Ambitious goals for sustainability, productivity, and safety, coupled with a shortage of human resources, have prompted the European mobile working machines ecosystem to come together in this network of Industrial Doctorates. Running from October 2025 to September 2029, ENGAGE will train a new generation of engineers to build next-generation mobile working machines for green and autonomous operations.
 
