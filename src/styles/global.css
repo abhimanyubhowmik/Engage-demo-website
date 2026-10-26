@@ -627,7 +627,7 @@ a.chip:hover {
   }
 }
 
-/* ------------------------------------------------------------------ theme-dependent logo */
+/* ------------------------------------------------------------------ logo */
 .logo {
   display: inline-flex;
   align-items: center;
@@ -636,9 +636,4 @@ a.chip:hover {
 }
 .logo img {
   height: auto;
-}
-:root[data-theme='green'] .logo__icon,
-:root[data-theme='green'] .logo__full,
-:root:not([data-theme='green']) .logo--full .logo__word {
-  display: none;
 }
