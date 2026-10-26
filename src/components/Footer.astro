@@ -10,7 +10,7 @@ const year = new Date().getFullYear();
   <div class="container">
     <div class="site-footer__top">
       <div class="site-footer__brand">
-        <Logo width={170} class="site-footer__logo" />
+        <Logo width={170} full class="site-footer__logo" />
         <p>
           Educating Europe’s future engineers for the next generation of mobile working machines — AI-driven sustainability,
           productivity and safety.
@@ -75,9 +75,8 @@ const year = new Date().getFullYear();
     gap: 40px;
     padding-bottom: 48px;
   }
-  .site-footer__brand :global(.logo__icon) {
-    width: auto;
-    height: 92px;
+  .site-footer__brand :global(.logo__full) {
+    width: 150px;
   }
   .site-footer__brand p {
     margin-top: 20px;

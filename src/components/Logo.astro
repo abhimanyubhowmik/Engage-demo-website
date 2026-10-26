@@ -2,15 +2,23 @@
 import { url } from '../lib/url';
 interface Props {
   width?: number;
+  /** Show the complete blue ENGAGE logo in the blue theme instead of icon + wordmark (used in the footer). */
+  full?: boolean;
   class?: string;
 }
 // Both themes share the ENGAGE wordmark (with the excavator); the blue theme adds the brain-and-gear icon.
-const { width = 150, class: cls } = Astro.props;
+const { width = 150, full = false, class: cls } = Astro.props;
 const word = url('/images/brand/engage-logo-light');
 const height = Math.round((width * 267) / 480);
 ---
-<span class:list={['logo', cls]}>
-  <img class="logo__icon" src={url('/images/brand/engage-icon.webp')} width={Math.round((height * 213) / 180)} height={height} alt="" decoding="async" />
+<span class:list={['logo', { 'logo--full': full }, cls]}>
+  {
+    full ? (
+      <img class="logo__full" src={url('/images/brand/engage-logo-blue-full.webp')} width="320" height="332" alt="ENGAGE — Future Engineers" decoding="async" />
+    ) : (
+      <img class="logo__icon" src={url('/images/brand/engage-icon.webp')} width={Math.round((height * 188) / 180)} height={height} alt="" decoding="async" />
+    )
+  }
   <picture class="logo__word">
     <source srcset={`${word}.webp`} type="image/webp" />
     <img src={`${word}.png`} width={width} height={height} alt="ENGAGE — Future Engineers" decoding="async" />
