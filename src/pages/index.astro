@@ -275,29 +275,9 @@ const themeOrder: ThemeId[] = ['perception', 'control', 'safety', 'simulation'];
   </section>
 
   <!-- PARTNER LOGOS -->
-  <section class="section logos" aria-labelledby="logos-title">
+  <section class="section section--tight logos" aria-labelledby="logos-title">
     <div class="container">
-      <div class="logos__intro">
-        <figure class="logos__figure" data-reveal>
-          <img
-            src={url('/images/brand/network-figure.webp')}
-            width="1100"
-            height="935"
-            alt="The ENGAGE network: 13 doctoral candidates at the centre, surrounded by the construction and mining, forestry, agriculture and logistics sectors, the industrial suppliers and the academic partners"
-            loading="lazy"
-            decoding="async"
-          />
-        </figure>
-        <div data-reveal style="--reveal-delay:100ms">
-          <p class="eyebrow">Our partners</p>
-          <h2 class="display h2" id="logos-title">Industry and academia, side by side</h2>
-          <p class="lead">
-            Machine manufacturers, technology suppliers and six academic groups share 13 doctoral projects — every candidate works with both a
-            university and a company.
-          </p>
-          <a class="link-arrow" href={url('/consortium/')}>Meet the consortium <Icon name="arrow-right" /></a>
-        </div>
-      </div>
+      <p class="eyebrow" id="logos-title">Our partners</p>
       <ul class="logos__grid">
         {
           partners.map((p) => (
@@ -817,20 +797,6 @@ const themeOrder: ThemeId[] = ['perception', 'control', 'safety', 'simulation'];
   }
 
   /* logos */
-  .logos__intro {
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: clamp(32px, 5vw, 72px);
-    align-items: center;
-    margin-bottom: clamp(40px, 5vw, 64px);
-  }
-  .logos__figure {
-    margin: 0;
-  }
-  .logos__figure img {
-    width: 100%;
-    height: auto;
-  }
   .logos__grid {
     list-style: none;
     margin: 0;
@@ -905,7 +871,6 @@ const themeOrder: ThemeId[] = ['perception', 'control', 'safety', 'simulation'];
   }
   @media (max-width: 900px) {
     .mission__grid,
-    .logos__intro,
     .map-teaser__grid {
       grid-template-columns: 1fr;
     }

@@ -1,20 +1,18 @@
 ---
 import { url } from '../lib/url';
 interface Props {
-  /** "horizontal" for the header, "stacked" for larger placements; only the blue logo differs. */
-  layout?: 'horizontal' | 'stacked';
   width?: number;
   class?: string;
 }
-const { layout = 'horizontal', width = 150, class: cls } = Astro.props;
-const green = url('/images/brand/engage-logo-light');
-const blue = url(layout === 'stacked' ? '/images/brand/engage-logo-blue-full.webp' : '/images/brand/engage-logo-blue.webp');
-const blueSize = layout === 'stacked' ? { w: 320, h: 331 } : { w: 424, h: 120 };
+// Both themes share the ENGAGE wordmark (with the excavator); the blue theme adds the brain-and-gear icon.
+const { width = 150, class: cls } = Astro.props;
+const word = url('/images/brand/engage-logo-light');
+const height = Math.round((width * 267) / 480);
 ---
-<span class:list={['logo', `logo--${layout}`, cls]}>
-  <picture class="logo__green">
-    <source srcset={`${green}.webp`} type="image/webp" />
-    <img src={`${green}.png`} width={width} height={Math.round((width * 267) / 480)} alt="ENGAGE — Future Engineers" decoding="async" />
+<span class:list={['logo', cls]}>
+  <img class="logo__icon" src={url('/images/brand/engage-icon.webp')} width={Math.round((height * 213) / 180)} height={height} alt="" decoding="async" />
+  <picture class="logo__word">
+    <source srcset={`${word}.webp`} type="image/webp" />
+    <img src={`${word}.png`} width={width} height={height} alt="ENGAGE — Future Engineers" decoding="async" />
   </picture>
-  <img class="logo__blue" src={blue} width={blueSize.w} height={blueSize.h} alt="ENGAGE — Future Engineers" decoding="async" />
 </span>

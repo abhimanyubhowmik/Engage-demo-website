@@ -33,13 +33,13 @@ Content lives in plain Markdown and TypeScript files, so adding a doctoral candi
 Images live in `public/images/`:
 
 - `people/` — DC portraits (3:4); `people/supervisors/` — supervisor portraits (square). Set `photo` on a DC or supervisor; without one, a monogram is shown.
-- `news/` — event photos. `logos/` — partner logos. `brand/` — both ENGAGE logos (green theme, blue theme), the network figure and icons.
+- `news/` — event photos. `logos/` — partner logos. `brand/` — the ENGAGE wordmark, the brain-and-gear icon, the network figure and favicons.
 - `photos/` — the industry key visuals (`hero-*.webp`, portrait) used by the home hero and industry tiles. `generated/` — procedural point-cloud artwork used for the research themes.
 
 ## Themes
 
-The switch in the header toggles between the **green** (forest) and **blue** (navy) theme; the blue theme uses the gear-and-brain
-ENGAGE logo. The choice is remembered in the visitor’s browser.
+The switch in the header toggles between the **blue** (navy, default) and **green** (forest) theme. Both use the ENGAGE wordmark with
+the excavator; the blue theme adds the brain-and-gear icon next to it. A visitor’s choice is remembered in their browser.
 
 ## Develop
 

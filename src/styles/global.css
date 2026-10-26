@@ -2,39 +2,10 @@
 @import '@fontsource-variable/archivo/wdth.css';
 
 /* ------------------------------------------------------------------ tokens */
-/* Two colour themes: "green" (forest, default) and "blue" (navy, with the gear-and-brain logo).
+/* Two colour themes: "blue" (navy, default, logo with the brain-and-gear icon) and "green" (forest).
    The theme is set on <html data-theme> by the switcher in the header. *-rgb tokens are channel
    triplets for translucent colours: rgb(var(--accent-rgb) / 0.2). */
 :root,
-:root[data-theme='green'] {
-  --bg: #06120e;
-  --bg-rgb: 6 18 14;
-  --bg-deep: #040c09;
-  --deep-rgb: 4 14 11;
-  --bg-elev: #0a1c16;
-  --surface: #0e241c;
-  --surface-2: #133026;
-  --line: #1d3a30;
-  --line-strong: #2b5244;
-  --text: #eef6f1;
-  --text-2: #bcd1c6;
-  --text2-rgb: 188 209 198;
-  --muted: #88a698;
-  --accent: #5fe3a1;
-  --accent-rgb: 95 227 161;
-  --accent-2: #2fbf86;
-  --accent-deep: #1b7f5f;
-  --paper: #f2f4ee;
-  --paper-2: #e6ebe3;
-  --ink: #0d2620;
-  --ink-rgb: 13 38 32;
-  --ink-2: #3c5a4f;
-  --map-bg: #071611;
-  --map-land: #0f2a21;
-  --map-stroke: #1f4537;
-  --map-member: #17493a;
-  --map-member-stroke: #3a8a6c;
-}
 :root[data-theme='blue'] {
   --bg: #0b1a30;
   --bg-rgb: 11 26 48;
@@ -63,6 +34,35 @@
   --map-stroke: #22406b;
   --map-member: #1b3f73;
   --map-member-stroke: #4677b8;
+}
+:root[data-theme='green'] {
+  --bg: #06120e;
+  --bg-rgb: 6 18 14;
+  --bg-deep: #040c09;
+  --deep-rgb: 4 14 11;
+  --bg-elev: #0a1c16;
+  --surface: #0e241c;
+  --surface-2: #133026;
+  --line: #1d3a30;
+  --line-strong: #2b5244;
+  --text: #eef6f1;
+  --text-2: #bcd1c6;
+  --text2-rgb: 188 209 198;
+  --muted: #88a698;
+  --accent: #5fe3a1;
+  --accent-rgb: 95 227 161;
+  --accent-2: #2fbf86;
+  --accent-deep: #1b7f5f;
+  --paper: #f2f4ee;
+  --paper-2: #e6ebe3;
+  --ink: #0d2620;
+  --ink-rgb: 13 38 32;
+  --ink-2: #3c5a4f;
+  --map-bg: #071611;
+  --map-land: #0f2a21;
+  --map-stroke: #1f4537;
+  --map-member: #17493a;
+  --map-member-stroke: #3a8a6c;
 }
 :root {
   --orange: #f7a823;
@@ -629,16 +629,14 @@ a.chip:hover {
 
 /* ------------------------------------------------------------------ theme-dependent logo */
 .logo {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
   line-height: 0;
-}
-.logo__blue,
-:root[data-theme='blue'] .logo__green {
-  display: none;
-}
-:root[data-theme='blue'] .logo__blue {
-  display: block;
 }
 .logo img {
   height: auto;
+}
+:root[data-theme='green'] .logo__icon {
+  display: none;
 }
