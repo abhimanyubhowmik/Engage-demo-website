@@ -38,8 +38,8 @@ Images live in `public/images/`:
 
 ## Themes
 
-The switch in the header toggles between the **blue** (navy, default) and **green** (forest) theme. Both use the ENGAGE wordmark with
-the excavator; in the blue theme the header adds the brain-and-gear icon next to it and the footer shows the complete blue logo. A visitor’s choice is remembered in their browser.
+The switch in the header toggles between the **blue** (navy, default) and **green** (forest) theme. The logo is the same in both:
+the header shows the brain-and-gear icon next to the ENGAGE wordmark, the footer shows the complete ENGAGE logo. A visitor’s choice is remembered in their browser.
 
 ## Develop
 
