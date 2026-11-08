@@ -88,14 +88,16 @@ const isActive = (href: string) => path === href || path.startsWith(href);
     gap: 16px;
   }
   .site-header__brand {
-    display: block;
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
   }
   .site-header__brand :global(.logo) {
     gap: 9px;
   }
+  /* wordmark slightly smaller than the icon: 50px vs 58px tall */
   .site-header__brand :global(.logo__word img) {
-    width: 112px;
+    width: 90px;
   }
   .site-header__brand :global(.logo__icon) {
     width: auto;
@@ -243,7 +245,7 @@ const isActive = (href: string) => path === href || path.startsWith(href);
   }
   @media (max-width: 420px) {
     .site-header__brand :global(.logo__word img) {
-      width: 96px;
+      width: 75px;
     }
     .site-header__brand :global(.logo__icon) {
       height: 48px;
