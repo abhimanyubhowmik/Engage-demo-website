@@ -637,3 +637,9 @@ a.chip:hover {
 .logo img {
   height: auto;
 }
+/* The wordmark image has the excavator above the ENGAGE text; lift it so the text block (rows 113-265 of 267),
+   not the whole image, is centred on the brain-and-gear icon. */
+.logo__icon + .logo__word {
+  display: block;
+  transform: translateY(-21%);
+}

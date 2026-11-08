@@ -111,6 +111,7 @@ export const supervisors: Supervisor[] = [
     title: 'Dr.',
     partner: 'fzi',
     kind: 'academic',
+    photo: '/images/people/supervisors/daaboul.webp',
     about: 'Co-supervises learning-based control and sim-to-real transfer for heavy mobile machinery.',
   },
   {
@@ -144,6 +145,7 @@ export const supervisors: Supervisor[] = [
     title: 'Prof.',
     org: 'University of Tartu',
     kind: 'academic',
+    photo: '/images/people/supervisors/singh.webp',
     about: 'Co-supervises safe motion planning and control on rough and dynamic terrain (the University of Tartu is not a host institution).',
   },
   {
@@ -188,6 +190,7 @@ export const supervisors: Supervisor[] = [
     title: 'Dr.',
     partner: 'gim',
     kind: 'industry',
+    photo: '/images/people/supervisors/peralta.webp',
     about: 'Industrial supervisor at GIM Robotics for AI-driven 3D perception in dynamic environments.',
   },
   {
@@ -222,6 +225,7 @@ export const supervisors: Supervisor[] = [
     title: 'Dr.-Ing.',
     partner: 'liebherr',
     kind: 'industry',
+    photo: '/images/people/supervisors/bos.webp',
     about: 'Industrial supervisor at Liebherr-Werk Bischofshofen for off-highway road quality maintenance.',
   },
 ];
